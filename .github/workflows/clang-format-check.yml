@@ -16,6 +16,7 @@ on:
       - '**clang-format-check.yml'
       - '**.clang-format'
   pull_request:
+    paths:
       - '**.ino'
       - '**.cpp'
       - '**.hpp'
