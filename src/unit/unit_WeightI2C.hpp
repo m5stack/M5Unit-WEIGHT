@@ -51,7 +51,7 @@ struct Data {
 
 /*!
   @class UnitWeightI2C
-  @brief Temperature and humidity, sensor unit
+  @brief WeightI2C unit
 */
 class UnitWeightI2C : public Component, public PeriodicMeasurementAdapter<UnitWeightI2C, weighti2c::Data> {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitWeightI2C, 0x26);

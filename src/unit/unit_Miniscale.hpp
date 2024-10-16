@@ -15,6 +15,10 @@
 namespace m5 {
 namespace unit {
 
+/*!
+  @class UnitMiniscale
+  @brief Miniscale unit
+*/
 class UnitMiniscale : public UnitWeightI2C {
     M5_UNIT_COMPONENT_HPP_BUILDER(UnitMiniscale, 0x26);
 

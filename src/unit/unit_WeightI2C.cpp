@@ -39,7 +39,7 @@ bool UnitWeightI2C::begin()
         M5_LIB_LOGE("Failed to read firmware version %x", ver);
         return false;
     }
-    M5_LIB_LOGW("firmware: %x", ver);
+    M5_LIB_LOGD("firmware: %x", ver);
 
     // Filter
     if (!enableLPFilter(_cfg.lp_enable) || !writeAvgFilterLevel(_cfg.avg_filter_level) ||
