@@ -8,7 +8,7 @@
 */
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
-#include <M5UnitUnifiedWeightI2C.h>
+#include <M5UnitUnifiedWEIGHT.h>
 #include <M5Utility.h>
 
 using m5::unit::weighti2c::Mode;
