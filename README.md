@@ -1,48 +1,49 @@
-# Product Name
+# M5Unit - WEIGHT
 
 ## Overview
 
-### SKU:xxx
+Library for WEIGHT using [M5UnitUnified](https://github.com/m5stack/M5UnitUnified).  
+M5UnitUnified is a library for unified handling of various M5 units products.
 
-Description of the product
+### SKU:U180
+
+The Weight I2C Unit is a weight acquisition transducer unit that employs the "STM32+HX711 chip" solution, achieving precision weight measurement with 24-bit accuracy through I2C communication. It supports the parallel connection of multiple devices on the same I2C bus, providing users with greater flexibility in terms of a wider range and more data collection points. It is suitable for various applications such as industrial production, healthcare, logistics, laboratory research, and food processing.
+
 
 ## Related Link
+See also examples using conventional methods here.
 
-- [Document & Datasheet](https://docs.m5stack.com/en/unit/product_Link)
+- [Unit WeightI2C & Datasheet](https://docs.m5stack.com/en/unit/Unit-Weight%20I2C)
 
-## Required Libraries:
 
-- [Adafruit_BMP280_Library](https://github.com/adafruit/Required_Libraries_Link)
+### Required Libraries:
+- [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
+- [M5Utility](https://github.com/m5stack/M5Utility)
+- [M5HAL](https://github.com/m5stack/M5HAL)
 
 ## License
 
-- [Product Name- MIT](LICENSE)
+- [M5Unit-WEIGHT - MIT](LICENSE)
 
-## Remaining steps(Editorial Staff Look,After following the steps, remember to delete all the content below)
+## Examples
+See also [examples/UnitUnified](examples/UnitUnified)
 
-1. Change [clang format check path](./.github/workflows/clang-format-check.yml#L9-L15).
-2. Add License content to [LICENSE](/LICENSE).
-3. Change link on line 78 of [bug-report.yml](./.github/ISSUE_TEMPLATE/bug-report.yml#L78).
 
-```cpp
-Example
-# M5Unit-ENV
 
-## Overview
+### Doxygen document
+[GitHub Pages](https://m5stack.github.io/M5Unit-WEIGHT/)
 
-### SKU:U001 & U001-B & U001-C
+If you want to generate documents on your local machine, execute the following command
 
-Contains M5Stack-**UNIT ENV** series related case programs.ENV is an environmental sensor with integrated SHT30 and QMP6988 internally to detect temperature, humidity, and atmospheric pressure data.
-
-## Related Link
-
-- [Document & Datasheet](https://docs.m5stack.com/en/unit/envIII)
-
-## Required Libraries:
-
-- [Adafruit_BMP280_Library](https://github.com/adafruit/Adafruit_BMP280_Library)
-
-## License
-
-- [M5Unit-ENV - MIT](LICENSE)
 ```
+bash docs/doxy.sh
+```
+
+It will output it under docs/html  
+If you want to output Git commit hashes to html, do it for the git cloned folder.
+
+#### Required
+- [Doxyegn](https://www.doxygen.nl/)
+- [pcregrep](https://formulae.brew.sh/formula/pcre2)
+- [Git](https://git-scm.com/) (Output commit hash to html)
+
