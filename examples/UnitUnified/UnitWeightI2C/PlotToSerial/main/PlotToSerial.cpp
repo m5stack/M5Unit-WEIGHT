@@ -25,6 +25,8 @@ constexpr Mode mode_table[] = {Mode::Float, Mode::Int};
 
 void setup()
 {
+    m5::utility::delay(2000);
+
     M5.begin();
 
     auto pin_num_sda = M5.getPin(m5::pin_name_t::port_a_sda);
