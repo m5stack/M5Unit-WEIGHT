@@ -9,12 +9,15 @@ M5UnitUnified is a library for unified handling of various M5 units products.
 
 The Weight I2C Unit is a weight acquisition transducer unit that employs the "STM32+HX711 chip" solution, achieving precision weight measurement with 24-bit accuracy through I2C communication. It supports the parallel connection of multiple devices on the same I2C bus, providing users with greater flexibility in terms of a wider range and more data collection points. It is suitable for various applications such as industrial production, healthcare, logistics, laboratory research, and food processing.
 
+### SKU:U177
+
+Mini Scales Unit is an integrated mini weighing unit that combines a 5kg weighing sensor, an ADC acquisition chip (HX711), and a protocol conversion MCU to directly output weighing results. The product is equipped with an STM32F030F4P6 microcontroller, uses the I2C communication protocol for external communication, and supports multiple modules working together.
 
 ## Related Link
 See also examples using conventional methods here.
 
 - [Unit WeightI2C & Datasheet](https://docs.m5stack.com/en/unit/Unit-Weight%20I2C)
-
+- [Unit MiniScales & Datashhet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
 
 ### Required Libraries:
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)

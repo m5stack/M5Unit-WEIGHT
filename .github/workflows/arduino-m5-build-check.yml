@@ -61,7 +61,7 @@ jobs:
 
         unit:
           - UnitWeightI2C
-#          - UnitMiniscale
+          - UnitMiniScales
 
         board:
           - m5stack_atom
