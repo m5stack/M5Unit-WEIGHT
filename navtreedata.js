@@ -24,8 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "M5Unit-WeightI2C", "index.html", [
-    [ "M5Unit-WEIGHT", "index.html", null ],
+  [ "M5Unit-WEIGHT", "index.html", [
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ]
     ] ],
