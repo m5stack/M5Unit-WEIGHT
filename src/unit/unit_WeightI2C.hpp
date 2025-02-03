@@ -262,10 +262,6 @@ protected:
     {
         return read_register(reg, &val, 1);
     }
-    inline bool read_register16(const uint8_t reg, uint16_t val)
-    {
-        return read_register(reg, (uint8_t*)&val, 2);
-    }
 
     bool start_periodic_measurement(const weighti2c::Mode mode, const uint32_t interval);
     bool stop_periodic_measurement();

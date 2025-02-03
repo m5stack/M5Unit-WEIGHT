@@ -57,7 +57,7 @@ jobs:
 
         unit:
           - UnitWeightI2C
-#          - UnitMiniscale
+          - UnitMiniScales
 
         board:
           - Core

@@ -14,7 +14,7 @@
 #define M5_UNIT_UNIFIED_WEIGHT_HPP
 
 #include "unit/unit_WeightI2C.hpp"
-#include "unit/unit_Miniscale.hpp"
+#include "unit/unit_MiniScales.hpp"
 
 /*!
   @namespace m5
