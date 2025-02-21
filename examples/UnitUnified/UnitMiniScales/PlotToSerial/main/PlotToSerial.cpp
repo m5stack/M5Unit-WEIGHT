@@ -75,7 +75,7 @@ void loop()
     if (unit.wasPressed()) {
         static uint32_t cidx{};
         unit.writeLEDColor((uint32_t)color_table[cidx]);
-        cidx = ++cidx % m5::stl::size(color_table);
+        cidx = (cidx + 1) % m5::stl::size(color_table);
     }
 
     // Behavior when BtnA is clicked changes depending on the value.
