@@ -52,6 +52,8 @@ void setup()
 void loop()
 {
     M5.update();
+    auto touch = M5.Touch.getDetail();
+
     Units.update();
     if (unit.updated()) {
         // Can be checked e.g. by serial plotters
@@ -65,7 +67,7 @@ void loop()
     // Behavior when BtnA is clicked changes depending on the value.
     constexpr int32_t BTN_A_FUNCTION{-1};
 
-    if (M5.BtnA.wasClicked()) {
+    if (M5.BtnA.wasClicked() || touch.wasClicked()) {
         switch (BTN_A_FUNCTION) {
             case 0: {  // Change mode
                 if (++idx > 1) {
