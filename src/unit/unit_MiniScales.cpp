@@ -20,7 +20,7 @@ namespace unit {
 
 const char UnitMiniScales::name[] = "UnitMiniScales";
 const types::uid_t UnitMiniScales::uid{"UnitMiniScales"_mmh3};
-const types::uid_t UnitMiniScales::attr{0};
+const types::attr_t UnitMiniScales::attr{attribute::AccessI2C};
 
 void UnitMiniScales::update(const bool force)
 {

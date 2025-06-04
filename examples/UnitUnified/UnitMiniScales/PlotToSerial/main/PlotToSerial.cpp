@@ -65,9 +65,9 @@ void loop()
     if (unit.updated()) {
         // Can be checked e.g. by serial plotters
         if (!idx) {
-            M5_LOGI("\n>Weight:%f", unit.weight());
+            M5.Log.printf(">Weight:%f\n", unit.weight());
         } else {
-            M5_LOGI("\n>iWeight:%d", unit.iweight());
+            M5.Log.printf(">iWeight:%d\n", unit.iweight());
         }
     }
 
@@ -75,7 +75,7 @@ void loop()
     if (unit.wasPressed()) {
         static uint32_t cidx{};
         unit.writeLEDColor((uint32_t)color_table[cidx]);
-        cidx = ++cidx % m5::stl::size(color_table);
+        cidx = (cidx + 1) % m5::stl::size(color_table);
     }
 
     // Behavior when BtnA is clicked changes depending on the value.
@@ -95,7 +95,7 @@ void loop()
                 unit.stopPeriodicMeasurement();
                 char txt[16]{};
                 if (unit.measureSingleshot(txt)) {
-                    M5_LOGI("\n>Singleshort:%s", txt);
+                    M5.Log.printf(">Singleshort:%s\n", txt);
                 } else {
                     M5_LOGE("Failed to measure");
                 }

@@ -52,20 +52,22 @@ void setup()
 void loop()
 {
     M5.update();
+    auto touch = M5.Touch.getDetail();
+
     Units.update();
     if (unit.updated()) {
         // Can be checked e.g. by serial plotters
         if (!idx) {
-            M5_LOGI("\n>Weight:%f", unit.weight());
+            M5.Log.printf(">Weight:%f\n", unit.weight());
         } else {
-            M5_LOGI("\n>iWeight:%d", unit.iweight());
+            M5.Log.printf(">iWeight:%d\n", unit.iweight());
         }
     }
 
     // Behavior when BtnA is clicked changes depending on the value.
     constexpr int32_t BTN_A_FUNCTION{-1};
 
-    if (M5.BtnA.wasClicked()) {
+    if (M5.BtnA.wasClicked() || touch.wasClicked()) {
         switch (BTN_A_FUNCTION) {
             case 0: {  // Change mode
                 if (++idx > 1) {
@@ -79,7 +81,7 @@ void loop()
                 unit.stopPeriodicMeasurement();
                 char txt[16]{};
                 if (unit.measureSingleshot(txt)) {
-                    M5_LOGI("\n>Singleshort:%s", txt);
+                    M5.Log.printf(">Singleshort:%s\n", txt);
                 } else {
                     M5_LOGE("Failed to measure");
                 }

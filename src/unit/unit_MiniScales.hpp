@@ -106,13 +106,22 @@ public:
      */
     bool readButtonStatus(bool& press);
     /*!
+      @brief Is button pressed?
+      @return True if pressed
+      @note The state is managed by update
+     */
+    inline bool isPressed() const
+    {
+        return _button;
+    }
+    /*!
       @brief Was button pressed?
       @return True if pressed
       @note The state is managed by update
      */
     inline bool wasPressed() const
     {
-        return _button && _button != _prev_button;
+        return _button && (_button != _prev_button);
     }
     /*!
       @brief Is button released?
@@ -121,7 +130,7 @@ public:
      */
     inline bool wasReleased()
     {
-        return !_button && _button != _prev_button;
+        return !_button && (_button != _prev_button);
     }
     ///@}
 

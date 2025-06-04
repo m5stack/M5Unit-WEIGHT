@@ -20,7 +20,7 @@ namespace unit {
 
 const char UnitWeightI2C::name[] = "UnitWeightI2C";
 const types::uid_t UnitWeightI2C::uid{"UnitWeightI2C"_mmh3};
-const types::uid_t UnitWeightI2C::attr{0};
+const types::attr_t UnitWeightI2C::attr{attribute::AccessI2C};
 
 bool UnitWeightI2C::begin()
 {
