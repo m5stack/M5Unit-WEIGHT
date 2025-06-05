@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">M5Unit-WEIGHT<span id="projectnumber">&#160;0.0.2 git rev:98e162a</span>
+   <div id="projectname">M5Unit-WEIGHT<span id="projectnumber">&#160;0.1.0 git rev:dab2ce0</span>
    </div>
   </td>
  </tr>
@@ -160,6 +160,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> (const <a 
 <tr class="memitem:a000e006c8256ac675fcaba447e30f26c" id="r_a000e006c8256ac675fcaba447e30f26c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a000e006c8256ac675fcaba447e30f26c">readButtonStatus</a> (bool &amp;press)</td></tr>
 <tr class="memdesc:a000e006c8256ac675fcaba447e30f26c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the button status.  <br /></td></tr>
 <tr class="separator:a000e006c8256ac675fcaba447e30f26c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71a9abcecfd68ab90f63063ed69c0bd0" id="r_a71a9abcecfd68ab90f63063ed69c0bd0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71a9abcecfd68ab90f63063ed69c0bd0">isPressed</a> () const</td></tr>
+<tr class="memdesc:a71a9abcecfd68ab90f63063ed69c0bd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is button pressed?  <br /></td></tr>
+<tr class="separator:a71a9abcecfd68ab90f63063ed69c0bd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad2710b94a618bf50bc0177750e88b6e" id="r_aad2710b94a618bf50bc0177750e88b6e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad2710b94a618bf50bc0177750e88b6e">wasPressed</a> () const</td></tr>
 <tr class="memdesc:aad2710b94a618bf50bc0177750e88b6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Was button pressed?  <br /></td></tr>
 <tr class="separator:aad2710b94a618bf50bc0177750e88b6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,6 +280,35 @@ std::unique_ptr&lt; m5::container::CircularBuffer&lt; <a class="el" href="struct
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>MiniScales unit. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a71a9abcecfd68ab90f63063ed69c0bd0" name="a71a9abcecfd68ab90f63063ed69c0bd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71a9abcecfd68ab90f63063ed69c0bd0">&#9670;&#160;</a></span>isPressed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool m5::unit::UnitMiniScales::isPressed </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Is button pressed? </p>
+<dl class="section return"><dt>Returns</dt><dd>True if pressed </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The state is managed by update </dd></dl>
+
+</div>
+</div>
 <a id="a000e006c8256ac675fcaba447e30f26c" name="a000e006c8256ac675fcaba447e30f26c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a000e006c8256ac675fcaba447e30f26c">&#9670;&#160;</a></span>readButtonStatus()</h2>
 
