@@ -17,7 +17,7 @@ on:
       - 'examples/UnitUnified/**.hpp'
       - 'examples/UnitUnified/**.h'
       - 'examples/UnitUnified/**.c'
-      - '/platformio-build-check.yml'
+      - '**/platformio-build-check.yml'
       - '**platformio.ini'
   pull_request:
     paths:
@@ -46,12 +46,12 @@ jobs:
   build:
     name: ${{ matrix.unit }}:${{ matrix.example }}@${{ matrix.board }}:${{ matrix.framework }}:${{ matrix.espressif32 }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
 
     strategy:
       fail-fast: false
-      #max-parallel: 1
-      
+      max-parallel: 20
+
       matrix:
         example:
           - PlotToSerial
@@ -67,58 +67,28 @@ jobs:
           - Fire
           - StampS3
           - Dial
-          - AtomMatrix
+          - Atom
           - AtomS3
           - AtomS3R
           - NanoC6
           - StickCPlus
           - StickCPlus2
+          - StickS3
           - Paper
           - CoreInk
+          - Cardputer
+          - Tab5
+          - NessoN1
 
         framework:
           - Arduino
 
         espressif32:
           - latest
-#          - '5_4_0'
-#          - '4_4_0'
-
-#        exclude:
-#          - board: CoreS3
-#            espressif32: '5_4_0'
-#          - board: CoreS3
-#            espressif32: '4_4_0'
-#          - board: StampS3
-#            espressif32: '5_4_0'
-#          - board: StampS3
-#            espressif32: '4_4_0'
-#          - board: AtomS3
-#            espressif32: '5_4_0'
-#          - board: AtomS3
-#            espressif32: '4_4_0'
-#          - board: Dial
-#            espressif32: '5_4_0'
-#          - board: Dial
-#            espressif32: '4_4_0'
-#          - board: NanoC6
-#            espressif32: '5_4_0'
-#          - board: NanoC6
-#            espressif32: '4_4_0'
-#          - board: StickCPlus
-#            espressif32: '5_4_0'
-#          - board: StickCPlus
-#            espressif32: '4_4_0'
-#          - board: Paper
-#            espressif32: '5_4_0'
-#          - board: Paper
-#            espressif32: '4_4_0'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Build examples
         uses: karniv00l/platformio-run-action@v1
