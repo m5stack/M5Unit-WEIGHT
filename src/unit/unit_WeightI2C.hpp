@@ -66,7 +66,7 @@ public:
         bool lp_enable{true};
         //! Averaging Filter level (0 - 50)
         uint8_t avg_filter_level{10};
-        // Exponential Moving Average Filter alpha (0-99)
+        //! Exponential Moving Average Filter alpha (0-99)
         uint8_t ema_filter_alpha{10};
         //! Start periodic measurement on begin?
         bool start_periodic{true};

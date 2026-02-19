@@ -34,8 +34,20 @@ bool UnitWeightI2C::begin()
         }
     }
 
+    // WeightI2C/MiniScales use HX711. Wait for power-up/reset settling (RATE=0: up to about 400ms)
+    // so the first weight readings are stable.
+    m5::utility::delay(400);
+
     uint8_t ver{};
-    if (!read_register8(FIRMWARE_VERSION_REG, ver) || ver == 0) {
+    bool ready{};
+    auto timeout_at = m5::utility::millis() + 1500;
+    do {
+        ready = read_register8(FIRMWARE_VERSION_REG, ver) && ver != 0;
+        if (!ready) {
+            m5::utility::delay(10);
+        }
+    } while (!ready && m5::utility::millis() <= timeout_at);
+    if (!ready) {
         M5_LIB_LOGE("Failed to read firmware version %x", ver);
         return false;
     }
@@ -103,7 +115,10 @@ bool UnitWeightI2C::measureSingleshot(char* buf)
     }
     if (buf) {
         buf[0] = '\0';
-        return read_register(WEIGHTX100_STRING_REG, (uint8_t*)buf, 16U);
+        // Spec: max 15 characters + '\0'
+        auto ok = read_register(WEIGHTX100_STRING_REG, reinterpret_cast<uint8_t*>(buf), 16U);
+        buf[15] = '\0';  // Defensive termination even if firmware returns malformed payload
+        return ok;
     }
     return false;
 }
