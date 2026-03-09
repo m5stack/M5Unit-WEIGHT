@@ -17,7 +17,7 @@ Mini Scales Unit is an integrated mini weighing unit that combines a 5kg weighin
 See also examples using conventional methods here.
 
 - [Unit WeightI2C & Datasheet](https://docs.m5stack.com/en/unit/Unit-Weight%20I2C)
-- [Unit MiniScales & Datashhet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
+- [Unit MiniScales & Datasheet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
 
 ### Required Libraries:
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
@@ -46,7 +46,7 @@ It will output it under docs/html
 If you want to output Git commit hashes to html, do it for the git cloned folder.
 
 #### Required
-- [Doxyegn](https://www.doxygen.nl/)
+- [Doxygen](https://www.doxygen.nl/)
 - [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
 
