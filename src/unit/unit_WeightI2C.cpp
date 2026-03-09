@@ -43,15 +43,25 @@ bool UnitWeightI2C::begin()
     auto timeout_at = m5::utility::millis() + 1500;
     do {
         ready = read_register8(FIRMWARE_VERSION_REG, ver) && ver != 0;
-        if (!ready) {
-            m5::utility::delay(10);
+        if (ready) {
+            break;
         }
+        m5::utility::delay(100);
     } while (!ready && m5::utility::millis() <= timeout_at);
     if (!ready) {
         M5_LIB_LOGE("Failed to read firmware version %x", ver);
         return false;
     }
     M5_LIB_LOGD("firmware: %x", ver);
+
+    // Detect GAP sign for polarity correction
+    float gap{};
+    if (readGap(gap)) {
+        _gap_negative = (gap < 0.0f);
+        if (_gap_negative) {
+            M5_LIB_LOGD("GAP is negative (%f), weight sign will be corrected", gap);
+        }
+    }
 
     // Filter
     if (!enableLPFilter(_cfg.lp_enable) || !writeAvgFilterLevel(_cfg.avg_filter_level) ||
@@ -104,7 +114,23 @@ bool UnitWeightI2C::measureSingleshot(weighti2c::Data& data, const weighti2c::Mo
         M5_LIB_LOGD("Periodic measurements are running");
         return false;
     }
-    return read_measurement(data, mode);
+    if (!read_measurement(data, mode)) {
+        return false;
+    }
+    // Correct sign when GAP is negative
+    if (_gap_negative) {
+        if (data.is_float) {
+            float w = *(float*)data.raw.data();
+            w       = -w;
+            std::memcpy(data.raw.data(), &w, 4);
+        } else {
+            int32_t w = (int32_t)((uint32_t)data.raw[0] | ((uint32_t)data.raw[1] << 8) | ((uint32_t)data.raw[2] << 16) |
+                                  ((uint32_t)data.raw[3] << 24));
+            w         = -w;
+            std::memcpy(data.raw.data(), &w, 4);
+        }
+    }
+    return true;
 }
 
 bool UnitWeightI2C::measureSingleshot(char* buf)
