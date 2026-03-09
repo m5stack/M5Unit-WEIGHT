@@ -40,7 +40,7 @@ void setup()
     M5_LOGI("BOARD:%X", M5.getBoard());
     M5_LOGI("Heap: %u", esp_get_free_heap_size());
 
-    lcd.clear(TFT_DARKGRAY);
+    lcd.fillScreen(TFT_DARKGRAY);
     ::testing::InitGoogleTest();
 
 #ifdef GTEST_FILTER

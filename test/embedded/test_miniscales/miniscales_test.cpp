@@ -14,16 +14,8 @@ using namespace m5::unit::googletest;
 using namespace m5::unit::miniscales;
 using namespace m5::unit::miniscales::command;
 
-const ::testing::Environment* global_fixture = ::testing::AddGlobalTestEnvironment(new GlobalFixture<100000U>());
-
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestWeightI2C,
-//                         ::testing::Values(false, true));
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestWeightI2C,
-// ::testing::Values(true));
-INSTANTIATE_TEST_SUITE_P(ParamValues, TestWeightI2C, ::testing::Values(false));
-
 // For UnitMiniScales-specific testing
-class TestMiniScales : public ComponentTestBase<UnitMiniScales, bool> {
+class TestMiniScales : public I2CComponentTestBase<UnitMiniScales> {
 protected:
     virtual UnitMiniScales* get_instance() override
     {
@@ -35,27 +27,18 @@ protected:
         }
         return ptr;
     }
-    virtual bool is_using_hal() const override
-    {
-        return GetParam();
-    };
 };
 
-// INSTANTIATE_TEST_SUITE_P(ParamValues, TestMiniScales,
-//                          ::testing::Values(false, true));
-//  INSTANTIATE_TEST_SUITE_P(ParamValues, TestMiniScales, ::testing::Values(true));
-INSTANTIATE_TEST_SUITE_P(ParamValues, TestMiniScales, ::testing::Values(false));
-
-TEST_P(TestMiniScales, LED)
+TEST_F(TestMiniScales, LED)
 {
     SCOPED_TRACE(ustr);
 
     uint32_t cnt{10};
 
     while (cnt--) {
-        uint8_t r = rng() & 0xFF;
-        uint8_t g = rng() & 0xFF;
-        uint8_t b = rng() & 0xFF;
+        uint8_t r = esp_random() & 0xFF;
+        uint8_t g = esp_random() & 0xFF;
+        uint8_t b = esp_random() & 0xFF;
         uint8_t r2{}, g2{}, b2{};
         uint32_t tmp{};
 
@@ -102,7 +85,7 @@ TEST_P(TestMiniScales, LED)
     EXPECT_TRUE(unit->writeLEDColor(0, 0, 0));
 }
 
-TEST_P(TestMiniScales, Button)
+TEST_F(TestMiniScales, Button)
 {
     SCOPED_TRACE(ustr);
 
