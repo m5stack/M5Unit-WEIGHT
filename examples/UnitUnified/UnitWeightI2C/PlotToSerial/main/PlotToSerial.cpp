@@ -124,7 +124,7 @@ void loop()
                 unit.stopPeriodicMeasurement();
                 char txt[16]{};
                 if (unit.measureSingleshot(txt)) {
-                    M5.Log.printf(">Singleshort:%s\n", txt);
+                    M5.Log.printf(">Singleshot:%s\n", txt);
                 } else {
                     M5_LOGE("Failed to measure");
                 }

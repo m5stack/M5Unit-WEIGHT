@@ -22,12 +22,9 @@ m5::unit::UnitMiniScales unit;
 uint32_t idx{};
 constexpr Mode mode_table[] = {Mode::Float, Mode::Int};
 
-constexpr lgfx::rgb888_t color_table[] = {
-    {128, 16, 32},
-    {32, 128, 16},
-    {16, 32, 128},
-    {0, 0, 0},
-};
+constexpr float WEIGHT_MIN{0.0f};
+constexpr float WEIGHT_MAX{5000.0f};  // MiniScales: 5kg load cell
+bool led_enabled{true};
 
 }  // namespace
 
@@ -112,13 +109,24 @@ void loop()
         } else {
             M5.Log.printf(">iWeight:%d\n", unit.iweight());
         }
+
+        // Update LED color based on weight: Blue(min) -> Red(max)
+        if (led_enabled) {
+            float w   = unit.weight();
+            float t   = (w - WEIGHT_MIN) / (WEIGHT_MAX - WEIGHT_MIN);
+            t         = std::fmin(1.0f, std::fmax(0.0f, t));
+            uint8_t r = static_cast<uint8_t>(t * 255);
+            uint8_t b = static_cast<uint8_t>((1.0f - t) * 255);
+            unit.writeLEDColor(r, 0, b);
+        }
     }
 
-    // Button on MiniScales
+    // Button on MiniScales: toggle LED ON/OFF
     if (unit.wasPressed()) {
-        static uint32_t cidx{};
-        unit.writeLEDColor((uint32_t)color_table[cidx]);
-        cidx = (cidx + 1) % m5::stl::size(color_table);
+        led_enabled = !led_enabled;
+        if (!led_enabled) {
+            unit.writeLEDColor(0, 0, 0);
+        }
     }
 
     // Behavior when BtnA is clicked changes depending on the value.
@@ -138,7 +146,7 @@ void loop()
                 unit.stopPeriodicMeasurement();
                 char txt[16]{};
                 if (unit.measureSingleshot(txt)) {
-                    M5.Log.printf(">Singleshort:%s\n", txt);
+                    M5.Log.printf(">Singleshot:%s\n", txt);
                 } else {
                     M5_LOGE("Failed to measure");
                 }
