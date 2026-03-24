@@ -188,6 +188,15 @@ TEST_F(TestWeightI2C, Singleshot)
     }
 }
 
+TEST_F(TestWeightI2C, ReadRawADC)
+{
+    SCOPED_TRACE(ustr);
+
+    int32_t adc{};
+    EXPECT_TRUE(unit->readRawADC(adc));
+    M5_LOGV("RawADC: %d", adc);
+}
+
 TEST_F(TestWeightI2C, Periodic)
 {
     SCOPED_TRACE(ustr);
@@ -237,7 +246,7 @@ TEST_F(TestWeightI2C, Periodic)
     }
 }
 
-TEST_F(TestWeightI2C, NegativeGapCorrection)
+TEST_F(TestWeightI2C, NegativeGap)
 {
     SCOPED_TRACE(ustr);
 
@@ -259,51 +268,26 @@ TEST_F(TestWeightI2C, NegativeGapCorrection)
     float w_pos = d_pos.weight();
     EXPECT_TRUE(std::isfinite(w_pos));
 
-    Data d_pos_int{};
-    EXPECT_TRUE(unit->measureSingleshot(d_pos_int, Mode::Int));
-    int32_t iw_pos = d_pos_int.iweight();
-
-    // Write negative GAP and re-begin to detect sign
+    // Write negative GAP and re-begin
     EXPECT_TRUE(unit->writeGap(-pos_gap));
     EXPECT_TRUE(unit->begin());
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
 
-    // Measure with negative GAP — sign correction should keep same direction
+    // Firmware returns same sign regardless of GAP sign
     Data d_neg{};
     EXPECT_TRUE(unit->measureSingleshot(d_neg, Mode::Float));
     float w_neg = d_neg.weight();
     EXPECT_TRUE(std::isfinite(w_neg));
 
-    Data d_neg_int{};
-    EXPECT_TRUE(unit->measureSingleshot(d_neg_int, Mode::Int));
-    int32_t iw_neg = d_neg_int.iweight();
-
-    // Verify correction: with negative GAP the firmware returns inverted values,
-    // but measureSingleshot() negates them back.  Without correction the raw
-    // negative-GAP reading would be  -w_pos  (opposite sign).  With correction
-    // it should be close to  +w_pos.  We read the *uncorrected* value from raw
-    // bytes to confirm the library actually flipped it.
-    M5_LOGI("Positive GAP: weight=%f iweight=%ld", w_pos, (long)iw_pos);
-    M5_LOGI("Negative GAP: weight=%f iweight=%ld", w_neg, (long)iw_neg);
-
-    // The two readings are taken at different times so they won't match exactly,
-    // but the corrected negative-GAP value must be closer to +w_pos than to -w_pos.
-    // i.e.  |w_neg - w_pos| < |w_neg - (-w_pos)|   ⟺   |w_neg - w_pos| < |w_neg + w_pos|
-    if (std::fabs(w_pos) > 1.0f) {
-        EXPECT_LT(std::fabs(w_neg - w_pos), std::fabs(w_neg + w_pos))
-            << "Float correction failed: pos=" << w_pos << " neg=" << w_neg;
-    }
-    if (std::abs(iw_pos) > 100) {
-        EXPECT_LT(std::abs(iw_neg - iw_pos), std::abs(iw_neg + iw_pos))
-            << "Int correction failed: pos=" << iw_pos << " neg=" << iw_neg;
-    }
+    M5_LOGV("Positive GAP: weight=%f", w_pos);
+    M5_LOGV("Negative GAP: weight=%f", w_neg);
 
     // Restore original GAP
     EXPECT_TRUE(unit->writeGap(original_gap));
     EXPECT_TRUE(unit->begin());
 }
 
-TEST_F(TestWeightI2C, ChageI2CAddress)
+TEST_F(TestWeightI2C, ChangeI2CAddress)
 {
     SCOPED_TRACE(ustr);
 

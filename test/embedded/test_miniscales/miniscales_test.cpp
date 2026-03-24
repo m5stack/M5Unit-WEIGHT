@@ -56,7 +56,7 @@ TEST_F(TestMiniScales, LED)
         EXPECT_EQ(g, (tmp >> 8) & 0xFF);
         EXPECT_EQ(b, (tmp & 0xFF));
 
-        // uin32_t
+        // uint32_t
         lgfx::rgb888_t rgb888(r, g, b);
         EXPECT_TRUE(unit->writeLEDColor((uint32_t)rgb888));
         EXPECT_TRUE(unit->readLEDColor(r2, g2, b2));
