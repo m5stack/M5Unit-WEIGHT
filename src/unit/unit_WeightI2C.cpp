@@ -47,21 +47,12 @@ bool UnitWeightI2C::begin()
             break;
         }
         m5::utility::delay(100);
-    } while (!ready && m5::utility::millis() <= timeout_at);
+    } while (m5::utility::millis() <= timeout_at);
     if (!ready) {
         M5_LIB_LOGE("Failed to read firmware version %x", ver);
         return false;
     }
     M5_LIB_LOGD("firmware: %x", ver);
-
-    // Detect GAP sign for polarity correction
-    float gap{};
-    if (readGap(gap)) {
-        _gap_negative = (gap < 0.0f);
-        if (_gap_negative) {
-            M5_LIB_LOGD("GAP is negative (%f), weight sign will be corrected", gap);
-        }
-    }
 
     // Filter
     if (!enableLPFilter(_cfg.lp_enable) || !writeAvgFilterLevel(_cfg.avg_filter_level) ||
@@ -114,23 +105,7 @@ bool UnitWeightI2C::measureSingleshot(weighti2c::Data& data, const weighti2c::Mo
         M5_LIB_LOGD("Periodic measurements are running");
         return false;
     }
-    if (!read_measurement(data, mode)) {
-        return false;
-    }
-    // Correct sign when GAP is negative
-    if (_gap_negative) {
-        if (data.is_float) {
-            float w = *(float*)data.raw.data();
-            w       = -w;
-            std::memcpy(data.raw.data(), &w, 4);
-        } else {
-            int32_t w = (int32_t)((uint32_t)data.raw[0] | ((uint32_t)data.raw[1] << 8) | ((uint32_t)data.raw[2] << 16) |
-                                  ((uint32_t)data.raw[3] << 24));
-            w         = -w;
-            std::memcpy(data.raw.data(), &w, 4);
-        }
-    }
-    return true;
+    return read_measurement(data, mode);
 }
 
 bool UnitWeightI2C::measureSingleshot(char* buf)
@@ -153,7 +128,7 @@ bool UnitWeightI2C::readGap(float& gap)
 {
     uint8_t buf[4]{};
     if (read_register(GAP_REG, buf, 4U)) {
-        gap = *(float*)buf;
+        std::memcpy(&gap, buf, sizeof(buf));
         return true;
     }
     return false;
@@ -162,7 +137,7 @@ bool UnitWeightI2C::readGap(float& gap)
 bool UnitWeightI2C::writeGap(const float gap, const uint32_t duration)
 {
     uint8_t buf[4]{};
-    std::memcpy(buf, (uint8_t*)&gap, 4);
+    std::memcpy(buf, &gap, sizeof(buf));
     if (writeRegister(GAP_REG, buf, 4U)) {
         m5::utility::delay(duration);
         return true;
@@ -179,7 +154,8 @@ bool UnitWeightI2C::readRawADC(int32_t& value)
 {
     uint8_t buf[4];
     if (read_register(RAW_ADC_REG, buf, 4U)) {
-        value = buf[0] | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2] << 16) | ((uint32_t)buf[3] << 24);
+        value = static_cast<int32_t>(static_cast<uint32_t>(buf[0]) | (static_cast<uint32_t>(buf[1]) << 8) |
+                                     (static_cast<uint32_t>(buf[2]) << 16) | (static_cast<uint32_t>(buf[3]) << 24));
         return true;
     }
     return false;

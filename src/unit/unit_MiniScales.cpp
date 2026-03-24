@@ -65,19 +65,18 @@ bool UnitMiniScales::writeLEDColor(const uint16_t rgb16)
 {
     // Same as M5GFX colortype rgb565_t
     union {
+        uint16_t raw{};
         struct {
             uint16_t b5 : 5;
             uint16_t g6 : 6;
             uint16_t r5 : 5;
         };
-        uint16_t raw;
-    } rgb565{};
+    } rgb565;
+
     rgb565.raw = rgb16;
     uint8_t r  = (rgb565.r5 << 3) + (rgb565.r5 >> 2);
     uint8_t g  = (rgb565.g6 << 2) + (rgb565.g6 >> 4);
     uint8_t b  = (rgb565.b5 << 3) + (rgb565.b5 >> 2);
-
-    M5_LIB_LOGE("%x %u/%u/%u", rgb16, r, g, b);
 
     return writeLEDColor(r, g, b);
 }

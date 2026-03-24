@@ -97,11 +97,11 @@ public:
     bool writeLEDColor(const uint8_t r, const uint8_t g, const uint8_t b);
     ///@}
 
-    ////@name Button
+    ///@name Button
     ///@{
     /*!
       @brief Read the button status
-      @param[out] pressse Press if true
+      @param[out] press Press if true
       @return True if successful
      */
     bool readButtonStatus(bool& press);
@@ -128,7 +128,7 @@ public:
       @return True if released
       @note The state is managed by update
      */
-    inline bool wasReleased()
+    inline bool wasReleased() const
     {
         return !_button && (_button != _prev_button);
     }
