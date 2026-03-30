@@ -91,6 +91,7 @@ TEST_F(TestWeightI2C, Settings)
     while (cnt--) {
         float gap{};
         gap = (static_cast<float>(esp_random()) / UINT32_MAX) * 200000.f - 100000.f;
+        SCOPED_TRACE(testing::Message() << "gap=" << gap);
         EXPECT_TRUE(unit->writeGap(gap));
         float gap2{};
         EXPECT_TRUE(unit->readGap(gap2));
@@ -110,6 +111,7 @@ TEST_F(TestWeightI2C, Settings)
     while (cnt--) {
         bool lp{}, tmp{};
         lp = (bool)(esp_random() & 1);
+        SCOPED_TRACE(testing::Message() << "lp=" << lp);
         EXPECT_TRUE(unit->enableLPFilter(lp));
         EXPECT_TRUE(unit->isEnabledLPFilter(tmp));
         // M5_LOGI("%u/%u", lp, tmp);
@@ -120,6 +122,7 @@ TEST_F(TestWeightI2C, Settings)
     while (cnt--) {
         uint8_t level{}, tmp{}, prev{};
         level = esp_random() & 0x7F;  // 0-127
+        SCOPED_TRACE(testing::Message() << "avg_filter_level=" << static_cast<unsigned>(level));
         // M5_LOGW("lv:%u", level);
 
         EXPECT_TRUE(unit->readAvgFilterLevel(prev));
@@ -141,6 +144,7 @@ TEST_F(TestWeightI2C, Settings)
     while (cnt--) {
         uint8_t alpha{}, tmp{}, prev{};
         alpha = esp_random() & 0x7F;
+        SCOPED_TRACE(testing::Message() << "ema_filter_alpha=" << static_cast<unsigned>(alpha));
         // M5_LOGW("alpha:%u", alpha);
 
         EXPECT_TRUE(unit->readEmaFilterAlpha(prev));

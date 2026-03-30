@@ -35,8 +35,13 @@ enum class Mode : uint8_t { Float, Int };
 struct Data {
     static_assert(sizeof(float) == 4, "Invalid float size");  // I2C protocol assumes IEEE 754 float (4 bytes)
     std::array<uint8_t, 4> raw{};                             //!< RAW data
+    //!< True if the payload should be interpreted with weight()
     bool is_float{};
 
+    /*!
+      @brief Get the measured weight as a floating-point value
+      @return Measured weight when `is_float` is true, otherwise `NaN`
+     */
     inline float weight() const
     {
         if (!is_float) {
@@ -46,6 +51,10 @@ struct Data {
         std::memcpy(&val, raw.data(), raw.size());
         return val;
     }
+    /*!
+      @brief Get the measured weight as an integer value multiplied by 100
+      @return Measured weight x100 when `is_float` is false, otherwise `INT32_MIN`
+     */
     inline int32_t iweight() const
     {
         return !is_float
@@ -94,7 +103,15 @@ public:
     {
     }
 
+    /*!
+      @brief Initialize the unit and apply the current configuration
+      @return True if successful
+     */
     virtual bool begin() override;
+    /*!
+      @brief Update the cached periodic measurement data
+      @param force Force the update even when the normal timing check would skip it
+     */
     virtual void update(const bool force = false) override;
 
     ///@name Settings for begin
@@ -111,12 +128,12 @@ public:
     }
     ///@}
 
-    ///@warning Depends on Mode
+    ///@warning Float mode uses `weight()`, Int mode uses `iweight()`
     ///@name Measurement data by periodic
     ///@{
     /*!
       @brief Oldest measured weight (float)
-      @warning Depends on Mode
+      @warning Valid only when periodic measurement uses Float mode. Use `iweight()` for Int mode.
      */
     inline float weight() const
     {
@@ -124,7 +141,7 @@ public:
     }
     /*!
       @brief Oldest measured weight (integer)
-      @warning Depends on Mode
+      @warning Valid only when periodic measurement uses Int mode. Use `weight()` for Float mode.
      */
     inline int32_t iweight() const
     {
@@ -160,7 +177,7 @@ public:
       @brief Measurement single shot
       @param[out] data Measured data
       @param mode Measurement mode
-      @warning During periodic detection runs, an error is returned
+      @warning Returns an error while periodic measurement is running
 
     */
     bool measureSingleshot(weighti2c::Data& data, const weighti2c::Mode mode);
@@ -169,7 +186,7 @@ public:
       @param[out] buf string buffer
       @return True if successful
       @warning Buffer length must be at least 16 bytes
-      @warning During periodic detection runs, an error is returned
+      @warning Returns an error while periodic measurement is running
      */
     bool measureSingleshot(char* buf);
     ///@}
@@ -178,13 +195,13 @@ public:
     ///@{
     /*!
       @brief Read the gap value
-      @param[out] gap value
+      @param[out] gap Calibration gap value in device-defined weight units
       @return True if successful
      */
     bool readGap(float& gap);
     /*!
       @brief Write the gap value
-      @param gap value
+      @param gap Calibration gap value in device-defined weight units
       @param duration Max command duration(ms)
       @return True if successful
      */
@@ -246,7 +263,7 @@ public:
      */
     bool readRawADC(int32_t& value);
 
-    ///@warning Handling warning
+    ///@warning Changing the I2C address can disconnect the unit until the host uses the new address
     ///@name I2C Address
     ///@{
     /*!

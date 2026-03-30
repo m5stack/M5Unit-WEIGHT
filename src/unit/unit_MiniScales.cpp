@@ -25,7 +25,7 @@ const types::attr_t UnitMiniScales::attr{attribute::AccessI2C};
 void UnitMiniScales::update(const bool force)
 {
     UnitWeightI2C::update(force);
-    if (_cfg.manage_button_status) {
+    if (_cfg_mini.manage_button_status) {
         _prev_button = _button;
         readButtonStatus(_button);
     }
@@ -37,7 +37,7 @@ bool UnitMiniScales::readLEDColor(uint32_t& rgb32)
 
     uint8_t r{}, g{}, b{};
     if (readLEDColor(r, g, b)) {
-        rgb32 = (r << 16) | (g << 8) | b;
+        rgb32 = (static_cast<uint32_t>(r) << 16) | (static_cast<uint32_t>(g) << 8) | static_cast<uint32_t>(b);
         return true;
     }
     return false;
@@ -64,19 +64,13 @@ bool UnitMiniScales::writeLEDColor(const uint8_t r, const uint8_t g, const uint8
 bool UnitMiniScales::writeLEDColor(const uint16_t rgb16)
 {
     // Same as M5GFX colortype rgb565_t
-    union {
-        uint16_t raw{};
-        struct {
-            uint16_t b5 : 5;
-            uint16_t g6 : 6;
-            uint16_t r5 : 5;
-        };
-    } rgb565;
+    const uint8_t r5 = static_cast<uint8_t>((rgb16 >> 11) & 0x1F);
+    const uint8_t g6 = static_cast<uint8_t>((rgb16 >> 5) & 0x3F);
+    const uint8_t b5 = static_cast<uint8_t>(rgb16 & 0x1F);
 
-    rgb565.raw = rgb16;
-    uint8_t r  = (rgb565.r5 << 3) + (rgb565.r5 >> 2);
-    uint8_t g  = (rgb565.g6 << 2) + (rgb565.g6 >> 4);
-    uint8_t b  = (rgb565.b5 << 3) + (rgb565.b5 >> 2);
+    uint8_t r = static_cast<uint8_t>((r5 << 3) + (r5 >> 2));
+    uint8_t g = static_cast<uint8_t>((g6 << 2) + (g6 >> 4));
+    uint8_t b = static_cast<uint8_t>((b5 << 3) + (b5 >> 2));
 
     return writeLEDColor(r, g, b);
 }
