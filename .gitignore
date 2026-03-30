@@ -45,3 +45,9 @@ docs/html/
 
 # Temporary
 tmp/
+
+# Secrets
+.env*
+*.pem
+*.key
+*.cert
