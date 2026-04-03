@@ -17,7 +17,7 @@ Mini Scales Unit is an integrated mini weighing unit that combines a 5kg weighin
 See also examples using conventional methods here.
 
 - [Unit WeightI2C & Datasheet](https://docs.m5stack.com/en/unit/Unit-Weight%20I2C)
-- [Unit MiniScales & Datashhet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
+- [Unit MiniScales & Datasheet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
 
 ### Required Libraries:
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)

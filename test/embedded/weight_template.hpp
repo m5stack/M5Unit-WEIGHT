@@ -14,14 +14,14 @@
 #include <googletest/test_helper.hpp>
 #include <unit/unit_WeightI2C.hpp>
 #include <cmath>
-#include <random>
+#include <esp_random.h>
 
 using namespace m5::unit::googletest;
 using namespace m5::unit;
 using namespace m5::unit::weighti2c;
 using namespace m5::unit::weighti2c::command;
 
-class TestWeightI2C : public ComponentTestBase<UnitWeightI2C, bool> {
+class TestWeightI2C : public I2CComponentTestBase<UnitWeightI2C> {
 protected:
     virtual UnitWeightI2C* get_instance() override
     {
@@ -33,20 +33,15 @@ protected:
         }
         return ptr;
     }
-    virtual bool is_using_hal() const override
-    {
-        return GetParam();
-    };
 };
 
 namespace {
-auto rng = std::default_random_engine{};
 
 constexpr Mode mode_table[] = {Mode::Float, Mode::Int};
 
 }  // namespace
 
-TEST_P(TestWeightI2C, CheckConfig)
+TEST_F(TestWeightI2C, CheckConfig)
 {
     SCOPED_TRACE(ustr);
 
@@ -84,16 +79,19 @@ TEST_P(TestWeightI2C, CheckConfig)
     EXPECT_TRUE(unit->inPeriodic());
 }
 
-TEST_P(TestWeightI2C, Settings)
+TEST_F(TestWeightI2C, Settings)
 {
     SCOPED_TRACE(ustr);
 
-    // GAP
+    // GAP — save original, restore after test
+    float original_gap{};
+    EXPECT_TRUE(unit->readGap(original_gap));
+
     uint32_t cnt{8};
     while (cnt--) {
         float gap{};
-        std::uniform_real_distribution<> dist(-100000.f, 100000.f);
-        gap = dist(rng);
+        gap = (static_cast<float>(esp_random()) / UINT32_MAX) * 200000.f - 100000.f;
+        SCOPED_TRACE(testing::Message() << "gap=" << gap);
         EXPECT_TRUE(unit->writeGap(gap));
         float gap2{};
         EXPECT_TRUE(unit->readGap(gap2));
@@ -102,6 +100,9 @@ TEST_P(TestWeightI2C, Settings)
         m5::utility::delay(1);
     }
 
+    // Restore original GAP
+    EXPECT_TRUE(unit->writeGap(original_gap));
+
     // Reset offset
     EXPECT_TRUE(unit->resetOffset());
 
@@ -109,7 +110,8 @@ TEST_P(TestWeightI2C, Settings)
     cnt = 32;
     while (cnt--) {
         bool lp{}, tmp{};
-        lp = (bool)(rng() & 1);
+        lp = (bool)(esp_random() & 1);
+        SCOPED_TRACE(testing::Message() << "lp=" << lp);
         EXPECT_TRUE(unit->enableLPFilter(lp));
         EXPECT_TRUE(unit->isEnabledLPFilter(tmp));
         // M5_LOGI("%u/%u", lp, tmp);
@@ -119,7 +121,8 @@ TEST_P(TestWeightI2C, Settings)
     cnt = 32;
     while (cnt--) {
         uint8_t level{}, tmp{}, prev{};
-        level = rng() & 0x7F;  // 0-127
+        level = esp_random() & 0x7F;  // 0-127
+        SCOPED_TRACE(testing::Message() << "avg_filter_level=" << static_cast<unsigned>(level));
         // M5_LOGW("lv:%u", level);
 
         EXPECT_TRUE(unit->readAvgFilterLevel(prev));
@@ -140,7 +143,8 @@ TEST_P(TestWeightI2C, Settings)
     cnt = 32;
     while (cnt--) {
         uint8_t alpha{}, tmp{}, prev{};
-        alpha = rng() & 0x7F;
+        alpha = esp_random() & 0x7F;
+        SCOPED_TRACE(testing::Message() << "ema_filter_alpha=" << static_cast<unsigned>(alpha));
         // M5_LOGW("alpha:%u", alpha);
 
         EXPECT_TRUE(unit->readEmaFilterAlpha(prev));
@@ -158,7 +162,7 @@ TEST_P(TestWeightI2C, Settings)
     EXPECT_FALSE(unit->writeEmaFilterAlpha(100));
 }
 
-TEST_P(TestWeightI2C, Singleshot)
+TEST_F(TestWeightI2C, Singleshot)
 {
     SCOPED_TRACE(ustr);
     Data dd{};
@@ -188,7 +192,16 @@ TEST_P(TestWeightI2C, Singleshot)
     }
 }
 
-TEST_P(TestWeightI2C, Periodic)
+TEST_F(TestWeightI2C, ReadRawADC)
+{
+    SCOPED_TRACE(ustr);
+
+    int32_t adc{};
+    EXPECT_TRUE(unit->readRawADC(adc));
+    M5_LOGV("RawADC: %d", adc);
+}
+
+TEST_F(TestWeightI2C, Periodic)
 {
     SCOPED_TRACE(ustr);
 
@@ -200,7 +213,10 @@ TEST_P(TestWeightI2C, Periodic)
         EXPECT_TRUE(unit->startPeriodicMeasurement(m));
         EXPECT_TRUE(unit->inPeriodic());
 
-        test_periodic_measurement(unit.get(), 8, 1);
+        auto r = collect_periodic_measurements(unit.get(), 8);
+        EXPECT_FALSE(r.timed_out);
+        EXPECT_EQ(r.update_count, 8U);
+        EXPECT_LE(r.median(), r.expected_interval + 1);
 
         EXPECT_TRUE(unit->stopPeriodicMeasurement());
         EXPECT_FALSE(unit->inPeriodic());
@@ -234,7 +250,48 @@ TEST_P(TestWeightI2C, Periodic)
     }
 }
 
-TEST_P(TestWeightI2C, ChageI2CAddress)
+TEST_F(TestWeightI2C, NegativeGap)
+{
+    SCOPED_TRACE(ustr);
+
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+
+    // Save original GAP
+    float original_gap{};
+    EXPECT_TRUE(unit->readGap(original_gap));
+
+    // Ensure positive GAP
+    float pos_gap = std::fabs(original_gap);
+    EXPECT_TRUE(unit->writeGap(pos_gap));
+    EXPECT_TRUE(unit->begin());
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+
+    // Measure with positive GAP
+    Data d_pos{};
+    EXPECT_TRUE(unit->measureSingleshot(d_pos, Mode::Float));
+    float w_pos = d_pos.weight();
+    EXPECT_TRUE(std::isfinite(w_pos));
+
+    // Write negative GAP and re-begin
+    EXPECT_TRUE(unit->writeGap(-pos_gap));
+    EXPECT_TRUE(unit->begin());
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+
+    // Firmware returns same sign regardless of GAP sign
+    Data d_neg{};
+    EXPECT_TRUE(unit->measureSingleshot(d_neg, Mode::Float));
+    float w_neg = d_neg.weight();
+    EXPECT_TRUE(std::isfinite(w_neg));
+
+    M5_LOGV("Positive GAP: weight=%f", w_pos);
+    M5_LOGV("Negative GAP: weight=%f", w_neg);
+
+    // Restore original GAP
+    EXPECT_TRUE(unit->writeGap(original_gap));
+    EXPECT_TRUE(unit->begin());
+}
+
+TEST_F(TestWeightI2C, ChangeI2CAddress)
 {
     SCOPED_TRACE(ustr);
 

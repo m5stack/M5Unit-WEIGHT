@@ -14,7 +14,8 @@
 #include <m5_utility/container/circular_buffer.hpp>
 #include <m5_utility/types.hpp>
 #include <array>
-#include <limits>  // NaN
+#include <cstring>  // std::memcpy
+#include <limits>   // NaN
 
 namespace m5 {
 namespace unit {
@@ -32,19 +33,34 @@ enum class Mode : uint8_t { Float, Int };
   @brief Measurement data group
  */
 struct Data {
-    static_assert(sizeof(float) == 4, "Invalid float size");
-    std::array<uint8_t, 4> raw{};  //!< RAW data
+    static_assert(sizeof(float) == 4, "Invalid float size");  // I2C protocol assumes IEEE 754 float (4 bytes)
+    std::array<uint8_t, 4> raw{};                             //!< RAW data
+    //!< True if the payload should be interpreted with weight()
     bool is_float{};
 
+    /*!
+      @brief Get the measured weight as a floating-point value
+      @return Measured weight when `is_float` is true, otherwise `NaN`
+     */
     inline float weight() const
     {
-        return is_float ? *(float*)raw.data() : std::numeric_limits<float>::quiet_NaN();
+        if (!is_float) {
+            return std::numeric_limits<float>::quiet_NaN();
+        }
+        float val{};
+        std::memcpy(&val, raw.data(), raw.size());
+        return val;
     }
+    /*!
+      @brief Get the measured weight as an integer value multiplied by 100
+      @return Measured weight x100 when `is_float` is false, otherwise `INT32_MIN`
+     */
     inline int32_t iweight() const
     {
-        return !is_float ? (int32_t)((uint32_t)raw[0] | ((uint32_t)raw[1] << 8) | ((uint32_t)raw[2] << 16) |
-                                     ((uint32_t)raw[3] << 24))
-                         : std::numeric_limits<int32_t>::min();
+        return !is_float
+                   ? static_cast<int32_t>(static_cast<uint32_t>(raw[0]) | (static_cast<uint32_t>(raw[1]) << 8) |
+                                          (static_cast<uint32_t>(raw[2]) << 16) | (static_cast<uint32_t>(raw[3]) << 24))
+                   : std::numeric_limits<int32_t>::min();
     }
 };
 }  // namespace weighti2c
@@ -66,7 +82,7 @@ public:
         bool lp_enable{true};
         //! Averaging Filter level (0 - 50)
         uint8_t avg_filter_level{10};
-        // Exponential Moving Average Filter alpha (0-99)
+        //! Exponential Moving Average Filter alpha (0-99)
         uint8_t ema_filter_alpha{10};
         //! Start periodic measurement on begin?
         bool start_periodic{true};
@@ -87,29 +103,37 @@ public:
     {
     }
 
+    /*!
+      @brief Initialize the unit and apply the current configuration
+      @return True if successful
+     */
     virtual bool begin() override;
+    /*!
+      @brief Update the cached periodic measurement data
+      @param force Force the update even when the normal timing check would skip it
+     */
     virtual void update(const bool force = false) override;
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configration */
+    /*! @brief Gets the configuration */
     inline config_t config()
     {
         return _cfg;
     }
-    //! @brief Set the configration
+    //! @brief Set the configuration
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
     }
     ///@}
 
-    ///@warning Depends on Mode
+    ///@warning Float mode uses `weight()`, Int mode uses `iweight()`
     ///@name Measurement data by periodic
     ///@{
     /*!
       @brief Oldest measured weight (float)
-      @warning Depends on Mode
+      @warning Valid only when periodic measurement uses Float mode. Use `iweight()` for Int mode.
      */
     inline float weight() const
     {
@@ -117,7 +141,7 @@ public:
     }
     /*!
       @brief Oldest measured weight (integer)
-      @warning Depends on Mode
+      @warning Valid only when periodic measurement uses Int mode. Use `weight()` for Float mode.
      */
     inline int32_t iweight() const
     {
@@ -151,9 +175,9 @@ public:
     ///@{
     /*!
       @brief Measurement single shot
-      @param[out] data Measuerd data
+      @param[out] data Measured data
       @param mode Measurement mode
-      @warning During periodic detection runs, an error is returned
+      @warning Returns an error while periodic measurement is running
 
     */
     bool measureSingleshot(weighti2c::Data& data, const weighti2c::Mode mode);
@@ -162,7 +186,7 @@ public:
       @param[out] buf string buffer
       @return True if successful
       @warning Buffer length must be at least 16 bytes
-      @warning During periodic detection runs, an error is returned
+      @warning Returns an error while periodic measurement is running
      */
     bool measureSingleshot(char* buf);
     ///@}
@@ -171,14 +195,14 @@ public:
     ///@{
     /*!
       @brief Read the gap value
-      @param[out] gap value
+      @param[out] gap Calibration gap value in device-defined weight units
       @return True if successful
      */
     bool readGap(float& gap);
     /*!
       @brief Write the gap value
-      @param gap value
-      @duration duration Max command duration(ms)
+      @param gap Calibration gap value in device-defined weight units
+      @param duration Max command duration(ms)
       @return True if successful
      */
     bool writeGap(const float gap, const uint32_t duration = 100);
@@ -239,12 +263,12 @@ public:
      */
     bool readRawADC(int32_t& value);
 
-    ///@warning Handling warning
+    ///@warning Changing the I2C address can disconnect the unit until the host uses the new address
     ///@name I2C Address
     ///@{
     /*!
       @brief Read the I2C address
-      @param i2c_address[out] I2C address
+      @param[out] i2c_address I2C address
       @return True if successful
      */
     bool readI2CAddress(uint8_t& i2c_address);
@@ -266,9 +290,6 @@ protected:
     bool start_periodic_measurement(const weighti2c::Mode mode, const uint32_t interval);
     bool stop_periodic_measurement();
     bool read_measurement(weighti2c::Data& d, const weighti2c::Mode m);
-    bool read_filter(uint8_t* buf3);
-    bool write_filter(const uint8_t* buf3);
-
     M5_UNIT_COMPONENT_PERIODIC_MEASUREMENT_ADAPTER_HPP_BUILDER(UnitWeightI2C, weighti2c::Data);
 
 protected:

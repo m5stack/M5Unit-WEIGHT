@@ -5,6 +5,7 @@
  */
 /*!
   @file M5UnitUnifiedWEIGHT.h
+  @brief Main header for the M5Unit-WEIGHT library
  */
 #ifndef M5_UNIT_UNIFIED_WEIGHT_H
 #define M5_UNIT_UNIFIED_WEIGHT_H

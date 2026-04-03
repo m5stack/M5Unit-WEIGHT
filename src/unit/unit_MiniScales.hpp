@@ -39,20 +39,24 @@ public:
     {
     }
 
+    /*!
+      @brief Update the cached measurement and button state
+      @param force Force the update even when the normal timing check would skip it
+     */
     virtual void update(const bool force = false) override;
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configration */
+    /*! @brief Gets the configuration */
     inline config_t config()
     {
-        return this->_cfg;
+        return _cfg_mini;
     }
-    //! @brief Set the configration
+    //! @brief Set the configuration
     inline void config(const config_t& cfg)
     {
-        _cfg = cfg;
-        UnitWeightI2C::config((UnitWeightI2C::config_t)(this->_cfg));
+        _cfg_mini = cfg;
+        UnitWeightI2C::config(static_cast<UnitWeightI2C::config_t>(_cfg_mini));
     }
     ///@}
 
@@ -97,11 +101,11 @@ public:
     bool writeLEDColor(const uint8_t r, const uint8_t g, const uint8_t b);
     ///@}
 
-    ////@name Button
+    ///@name Button
     ///@{
     /*!
       @brief Read the button status
-      @param[out] pressse Press if true
+      @param[out] press Press if true
       @return True if successful
      */
     bool readButtonStatus(bool& press);
@@ -128,7 +132,7 @@ public:
       @return True if released
       @note The state is managed by update
      */
-    inline bool wasReleased()
+    inline bool wasReleased() const
     {
         return !_button && (_button != _prev_button);
     }
@@ -136,7 +140,7 @@ public:
 
 private:
     bool _button{}, _prev_button{};
-    config_t _cfg{};
+    config_t _cfg_mini{};
 };
 
 namespace miniscales {

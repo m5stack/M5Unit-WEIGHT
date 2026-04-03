@@ -34,8 +34,21 @@ bool UnitWeightI2C::begin()
         }
     }
 
+    // WeightI2C/MiniScales use HX711. Wait for power-up/reset settling (RATE=0: up to about 400ms)
+    // so the first weight readings are stable.
+    m5::utility::delay(400);
+
     uint8_t ver{};
-    if (!read_register8(FIRMWARE_VERSION_REG, ver) || ver == 0) {
+    bool ready{};
+    auto timeout_at = m5::utility::millis() + 1500;
+    do {
+        ready = read_register8(FIRMWARE_VERSION_REG, ver) && ver != 0;
+        if (ready) {
+            break;
+        }
+        m5::utility::delay(100);
+    } while (m5::utility::millis() <= timeout_at);
+    if (!ready) {
         M5_LIB_LOGE("Failed to read firmware version %x", ver);
         return false;
     }
@@ -103,7 +116,10 @@ bool UnitWeightI2C::measureSingleshot(char* buf)
     }
     if (buf) {
         buf[0] = '\0';
-        return read_register(WEIGHTX100_STRING_REG, (uint8_t*)buf, 16U);
+        // Spec: max 15 characters + '\0'
+        auto ok = read_register(WEIGHTX100_STRING_REG, reinterpret_cast<uint8_t*>(buf), 16U);
+        buf[15] = '\0';  // Defensive termination even if firmware returns malformed payload
+        return ok;
     }
     return false;
 }
@@ -112,7 +128,7 @@ bool UnitWeightI2C::readGap(float& gap)
 {
     uint8_t buf[4]{};
     if (read_register(GAP_REG, buf, 4U)) {
-        gap = *(float*)buf;
+        std::memcpy(&gap, buf, sizeof(buf));
         return true;
     }
     return false;
@@ -121,7 +137,7 @@ bool UnitWeightI2C::readGap(float& gap)
 bool UnitWeightI2C::writeGap(const float gap, const uint32_t duration)
 {
     uint8_t buf[4]{};
-    std::memcpy(buf, (uint8_t*)&gap, 4);
+    std::memcpy(buf, &gap, sizeof(buf));
     if (writeRegister(GAP_REG, buf, 4U)) {
         m5::utility::delay(duration);
         return true;
@@ -138,7 +154,8 @@ bool UnitWeightI2C::readRawADC(int32_t& value)
 {
     uint8_t buf[4];
     if (read_register(RAW_ADC_REG, buf, 4U)) {
-        value = buf[0] | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2] << 16) | ((uint32_t)buf[3] << 24);
+        value = static_cast<int32_t>(static_cast<uint32_t>(buf[0]) | (static_cast<uint32_t>(buf[1]) << 8) |
+                                     (static_cast<uint32_t>(buf[2]) << 16) | (static_cast<uint32_t>(buf[3]) << 24));
         return true;
     }
     return false;
