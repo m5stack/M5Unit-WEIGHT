@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['measuresingleshot_0',['measureSingleshot',['../classm5_1_1unit_1_1_unit_weight_i2_c.html#a1b799e76c528e8d57b001c82260ef159',1,'m5::unit::UnitWeightI2C::measureSingleshot(weighti2c::Data &amp;data, const weighti2c::Mode mode)'],['../classm5_1_1unit_1_1_unit_weight_i2_c.html#a88a2b961ff6d8fa4aedfb62ee8929516',1,'m5::unit::UnitWeightI2C::measureSingleshot(char *buf)']]]
+  ['isenabledlpfilter_0',['isEnabledLPFilter',['../classm5_1_1unit_1_1_unit_weight_i2_c.html#a3931cec60fc493bcdc5f7849bc368aa8',1,'m5::unit::UnitWeightI2C']]],
+  ['ispressed_1',['isPressed',['../classm5_1_1unit_1_1_unit_mini_scales.html#a71a9abcecfd68ab90f63063ed69c0bd0',1,'m5::unit::UnitMiniScales']]],
+  ['iweight_2',['iweight',['../structm5_1_1unit_1_1weighti2c_1_1_data.html#a8b30a5c3fa22c4367e3f4b39eb124d07',1,'m5::unit::weighti2c::Data::iweight()'],['../classm5_1_1unit_1_1_unit_weight_i2_c.html#abdf1dde039f2368b0eff80cbce90774b',1,'m5::unit::UnitWeightI2C::iweight()']]]
 ];

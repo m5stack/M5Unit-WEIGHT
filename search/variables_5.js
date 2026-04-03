@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['start_5fperiodic_0',['start_periodic',['../structm5_1_1unit_1_1_unit_weight_i2_c_1_1config__t.html#a3ac8375ad6ad90ff296771456932e44c',1,'m5::unit::UnitWeightI2C::config_t']]]
+  ['raw_0',['raw',['../structm5_1_1unit_1_1weighti2c_1_1_data.html#ad28986887b48f558172cc4854b553292',1,'m5::unit::weighti2c::Data']]]
 ];

@@ -1,10 +1,6 @@
 var searchData=
 [
-  ['unit_0',['unit',['../namespaceunit.html',1,'']]],
-  ['unit_5fminiscales_2ecpp_1',['unit_MiniScales.cpp',['../unit___mini_scales_8cpp.html',1,'']]],
-  ['unit_5fminiscales_2ehpp_2',['unit_MiniScales.hpp',['../unit___mini_scales_8hpp.html',1,'']]],
-  ['unit_5fweighti2c_2ecpp_3',['unit_WeightI2C.cpp',['../unit___weight_i2_c_8cpp.html',1,'']]],
-  ['unit_5fweighti2c_2ehpp_4',['unit_WeightI2C.hpp',['../unit___weight_i2_c_8hpp.html',1,'']]],
-  ['unitminiscales_5',['UnitMiniScales',['../classm5_1_1unit_1_1_unit_mini_scales.html',1,'m5::unit']]],
-  ['unitweighti2c_6',['UnitWeightI2C',['../classm5_1_1unit_1_1_unit_weight_i2_c.html',1,'m5::unit']]]
+  ['start_5fperiodic_0',['start_periodic',['../structm5_1_1unit_1_1_unit_weight_i2_c_1_1config__t.html#a3ac8375ad6ad90ff296771456932e44c',1,'m5::unit::UnitWeightI2C::config_t']]],
+  ['startperiodicmeasurement_1',['startPeriodicMeasurement',['../classm5_1_1unit_1_1_unit_weight_i2_c.html#a1341218c16752c4d524a1de6c22f7b3b',1,'m5::unit::UnitWeightI2C']]],
+  ['stopperiodicmeasurement_2',['stopPeriodicMeasurement',['../classm5_1_1unit_1_1_unit_weight_i2_c.html#a63e23670efee9520b9b2009d69c1e8b0',1,'m5::unit::UnitWeightI2C']]]
 ];

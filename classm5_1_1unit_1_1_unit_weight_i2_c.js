@@ -1,6 +1,7 @@
 var classm5_1_1unit_1_1_unit_weight_i2_c =
 [
     [ "config_t", "structm5_1_1unit_1_1_unit_weight_i2_c_1_1config__t.html", "structm5_1_1unit_1_1_unit_weight_i2_c_1_1config__t" ],
+    [ "begin", "classm5_1_1unit_1_1_unit_weight_i2_c.html#afd2b5fb40997fa630e80bda276c0f051", null ],
     [ "changeI2CAddress", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a4c156f5f83172bc4cf44d89ce27e2f42", null ],
     [ "config", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a3a104b019e5f9087aad9e4b5ca129ad3", null ],
     [ "config", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a5dc1d23e9f95c6502e259f6a4bd0f445", null ],
@@ -17,6 +18,7 @@ var classm5_1_1unit_1_1_unit_weight_i2_c =
     [ "resetOffset", "classm5_1_1unit_1_1_unit_weight_i2_c.html#ad4f35a1b23ce69463e6019a5b31e276d", null ],
     [ "startPeriodicMeasurement", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a1341218c16752c4d524a1de6c22f7b3b", null ],
     [ "stopPeriodicMeasurement", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a63e23670efee9520b9b2009d69c1e8b0", null ],
+    [ "update", "classm5_1_1unit_1_1_unit_weight_i2_c.html#ae880cc426769755ea450d58c9c850dd6", null ],
     [ "weight", "classm5_1_1unit_1_1_unit_weight_i2_c.html#af79480b6f74848970b9d549676d4c841", null ],
     [ "writeAvgFilterLevel", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a0ae3c9bc5199a5aa3692b6c2acc5ae81", null ],
     [ "writeEmaFilterAlpha", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a74946a80d9786a1174b96e1f3718e138", null ],
