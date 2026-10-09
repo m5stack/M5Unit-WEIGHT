@@ -72,7 +72,7 @@ TEST_F(TestMiniScales, LED)
 
         // uint16_t
         lgfx::rgb565_t rgb565(r, g, b);
-        EXPECT_TRUE(unit->writeLEDColor((uint16_t)rgb565));
+        EXPECT_TRUE(unit->writeLEDColor565(static_cast<uint16_t>(rgb565)));
         EXPECT_TRUE(unit->readLEDColor(r2, g2, b2));
 
         EXPECT_EQ(rgb565.R8(), r2);

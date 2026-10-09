@@ -64,7 +64,7 @@ bool UnitMiniScales::writeLEDColor(const uint8_t r, const uint8_t g, const uint8
     return writeRegister(RGB_LED_REG, color, 3U);
 }
 
-bool UnitMiniScales::writeLEDColor(const uint16_t rgb16)
+bool UnitMiniScales::writeLEDColor565(const uint16_t rgb16)
 {
     // Same as M5GFX colortype rgb565_t
     const uint8_t r5 = static_cast<uint8_t>((rgb16 >> 11) & 0x1F);

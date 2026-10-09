@@ -64,7 +64,7 @@ struct Data {
 }  // namespace weighti2c
 
 /*!
-  @class UnitWeightI2C
+  @class m5::unit::UnitWeightI2C
   @brief WeightI2C unit
 */
 class UnitWeightI2C : public Component, public PeriodicMeasurementAdapter<UnitWeightI2C, weighti2c::Data> {

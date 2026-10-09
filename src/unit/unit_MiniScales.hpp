@@ -96,11 +96,16 @@ public:
         return writeLEDColor((rgb32 >> 16) & 0xFF, (rgb32 >> 8) & 0xFF, rgb32 & 0xFF);
     }
     /*!
-      @brief Write the LED color as RGB16 (RRRRRGGGGGGBBBBB BIN)
+      @brief Write the LED color as RGB565 (RRRRRGGGGGGBBBBB BIN)
       @param rgb16 color
       @return True if successful
     */
-    bool writeLEDColor(const uint16_t rgb16);
+    bool writeLEDColor565(const uint16_t rgb16);
+    //! @brief Deprecated alias for writeLEDColor565() (an integer literal is ambiguous with writeLEDColor(uint32_t))
+    [[deprecated("Use writeLEDColor565() instead")]] inline bool writeLEDColor(const uint16_t rgb16)
+    {
+        return writeLEDColor565(rgb16);
+    }
     /*!
       @brief Write the LED color as individual components
       @param r R
