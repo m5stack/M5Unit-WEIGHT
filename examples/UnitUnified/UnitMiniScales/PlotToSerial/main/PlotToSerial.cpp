@@ -6,6 +6,7 @@
 /*
   Example using M5UnitUnified for UnitMiniScales
 */
+#include <cinttypes>
 #include <cmath>
 
 #include <M5Unified.h>
@@ -72,16 +73,16 @@ void loop()
         if (!idx) {
             M5.Log.printf(">Weight:%f\n", unit.weight());
         } else {
-            M5.Log.printf(">iWeight:%d\n", unit.iweight());
+            M5.Log.printf(">iWeight:%" PRId32 "\n", unit.iweight());
         }
 
         // Update LED color based on weight: Blue(min) -> Red(max)
         if (led_enabled) {
-            float w   = unit.weight();
-            float t   = (w - WEIGHT_MIN) / (WEIGHT_MAX - WEIGHT_MIN);
-            t         = std::fmin(1.0f, std::fmax(0.0f, t));
-            uint8_t r = static_cast<uint8_t>(t * 255);
-            uint8_t b = static_cast<uint8_t>((1.0f - t) * 255);
+            const float w = idx ? unit.iweight() / 100.0f : unit.weight();
+            float t       = (w - WEIGHT_MIN) / (WEIGHT_MAX - WEIGHT_MIN);
+            t             = std::fmin(1.0f, std::fmax(0.0f, t));
+            uint8_t r     = static_cast<uint8_t>(t * 255);
+            uint8_t b     = static_cast<uint8_t>((1.0f - t) * 255);
             unit.writeLEDColor(r, 0, b);
         }
     }

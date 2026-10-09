@@ -6,6 +6,8 @@
 /*
   Example using M5UnitUnified for UnitWeightI2C
 */
+#include <cinttypes>
+
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedWEIGHT.h>
@@ -66,7 +68,7 @@ void loop()
         if (!idx) {
             M5.Log.printf(">Weight:%f\n", unit.weight());
         } else {
-            M5.Log.printf(">iWeight:%d\n", unit.iweight());
+            M5.Log.printf(">iWeight:%" PRId32 "\n", unit.iweight());
         }
     }
 
