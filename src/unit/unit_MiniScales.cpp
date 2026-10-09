@@ -27,7 +27,10 @@ void UnitMiniScales::update(const bool force)
     UnitWeightI2C::update(force);
     if (_cfg_mini.manage_button_status) {
         _prev_button = _button;
-        readButtonStatus(_button);
+        bool press{};
+        if (readButtonStatus(press)) {
+            _button = press;
+        }
     }
 }
 
@@ -68,9 +71,9 @@ bool UnitMiniScales::writeLEDColor(const uint16_t rgb16)
     const uint8_t g6 = static_cast<uint8_t>((rgb16 >> 5) & 0x3F);
     const uint8_t b5 = static_cast<uint8_t>(rgb16 & 0x1F);
 
-    uint8_t r = static_cast<uint8_t>((r5 << 3) + (r5 >> 2));
-    uint8_t g = static_cast<uint8_t>((g6 << 2) + (g6 >> 4));
-    uint8_t b = static_cast<uint8_t>((b5 << 3) + (b5 >> 2));
+    const uint8_t r = static_cast<uint8_t>((r5 << 3) + (r5 >> 2));
+    const uint8_t g = static_cast<uint8_t>((g6 << 2) + (g6 >> 4));
+    const uint8_t b = static_cast<uint8_t>((b5 << 3) + (b5 >> 2));
 
     return writeLEDColor(r, g, b);
 }

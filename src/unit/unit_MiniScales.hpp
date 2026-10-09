@@ -32,6 +32,10 @@ public:
         bool manage_button_status{true};
     };
 
+    /*!
+      @brief Constructor
+      @param addr I2C address
+     */
     explicit UnitMiniScales(const uint8_t addr = DEFAULT_ADDRESS) : UnitWeightI2C(addr)
     {
     }
@@ -47,12 +51,18 @@ public:
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configuration */
+    /*!
+      @brief Gets the configuration
+      @return Current configuration
+     */
     inline config_t config()
     {
         return _cfg_mini;
     }
-    //! @brief Set the configuration
+    /*!
+      @brief Sets the configuration
+      @param cfg Configuration
+     */
     inline void config(const config_t& cfg)
     {
         _cfg_mini = cfg;
@@ -69,7 +79,7 @@ public:
     */
     bool readLEDColor(uint32_t& rgb32);
     /*!
-      @brief Read the LED color as each colors
+      @brief Read the LED color as individual components
       @param[out] r R
       @param[out] g G
       @param[out] b B
@@ -92,7 +102,7 @@ public:
     */
     bool writeLEDColor(const uint16_t rgb16);
     /*!
-      @brief Write the LED color as each colors
+      @brief Write the LED color as individual components
       @param r R
       @param g G
       @param b B
@@ -128,7 +138,7 @@ public:
         return _button && (_button != _prev_button);
     }
     /*!
-      @brief Is button released?
+      @brief Was button released?
       @return True if released
       @note The state is managed by update
      */
