@@ -105,7 +105,7 @@ public:
         _dirty = false;
         _sprite.fillSprite(0);
 
-        const int32_t m     = 3;
+        const int32_t m{3};
         const int32_t bar_h = std::max<int32_t>(_h / 8, 4);
         const int32_t bar_y = _h - bar_h - m;
         const int32_t bar_w = _w - m * 2;
@@ -129,7 +129,7 @@ public:
         // Large weight (or the notice), centered above the bar
         _sprite.setFont(&fonts::Orbitron_Light_32);
         _sprite.setTextSize(1);
-        const int32_t text_top  = 10;
+        const int32_t text_top{10};
         const int32_t text_area = bar_y - text_top;
         const float sx          = _w * 0.9f / _sprite.textWidth("-0000.00");
         const float sy          = text_area / static_cast<float>(_sprite.fontHeight());
@@ -158,9 +158,15 @@ void update_led(const float weight)
     const float t     = std::fmin(1.0f, std::fmax(0.0f, weight / WEIGHT_MAX));
     const float level = 0.1f + 0.9f * t;  // Keep it dimly lit at 0 g
     const uint32_t c  = mini_scales_color;
-    mini_scales.writeLEDColor(static_cast<uint8_t>(((c >> 16) & 0xFF) * level),
-                              static_cast<uint8_t>(((c >> 8) & 0xFF) * level),
-                              static_cast<uint8_t>((c & 0xFF) * level));
+    const uint8_t r   = static_cast<uint8_t>(((c >> 16) & 0xFF) * level);
+    const uint8_t g   = static_cast<uint8_t>(((c >> 8) & 0xFF) * level);
+    const uint8_t b   = static_cast<uint8_t>((c & 0xFF) * level);
+    static uint32_t last{0xFFFFFFFFU};  // Not a valid RGB, so the first call always writes
+    const uint32_t rgb = (static_cast<uint32_t>(r) << 16) | (static_cast<uint32_t>(g) << 8) | b;
+    if (rgb != last) {  // Write only when the color changes
+        last = rgb;
+        mini_scales.writeLEDColor(r, g, b);
+    }
 }
 
 void show_notice(const uint32_t idx, const char* text)

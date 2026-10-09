@@ -62,8 +62,15 @@ void update_led()
     const float t     = std::fmin(1.0f, std::fmax(0.0f, (last_weight - WEIGHT_MIN) / (WEIGHT_MAX - WEIGHT_MIN)));
     const float level = 0.1f + 0.9f * t;  // Keep it dimly lit at 0 g
     const uint32_t c  = function_color[m5::stl::to_underlying(function)];
-    unit.writeLEDColor(static_cast<uint8_t>(((c >> 16) & 0xFF) * level),
-                       static_cast<uint8_t>(((c >> 8) & 0xFF) * level), static_cast<uint8_t>((c & 0xFF) * level));
+    const uint8_t r   = static_cast<uint8_t>(((c >> 16) & 0xFF) * level);
+    const uint8_t g   = static_cast<uint8_t>(((c >> 8) & 0xFF) * level);
+    const uint8_t b   = static_cast<uint8_t>((c & 0xFF) * level);
+    static uint32_t last{0xFFFFFFFFU};  // Not a valid RGB, so the first call always writes
+    const uint32_t rgb = (static_cast<uint32_t>(r) << 16) | (static_cast<uint32_t>(g) << 8) | b;
+    if (rgb != last) {  // Write only when the color changes
+        last = rgb;
+        unit.writeLEDColor(r, g, b);
+    }
 }
 
 bool start_periodic()
@@ -76,7 +83,7 @@ bool start_periodic()
 std::string function_state()
 {
     if (function == Function::Singleshot) {
-        return m5::utility::formatString("Singleshot #%u", ss_count);
+        return m5::utility::formatString("Singleshot #%" PRIu32, ss_count);
     }
     return function_name[m5::stl::to_underlying(function)];
 }

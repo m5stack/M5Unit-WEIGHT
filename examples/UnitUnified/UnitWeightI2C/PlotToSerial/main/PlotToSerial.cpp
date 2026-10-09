@@ -58,7 +58,7 @@ bool start_periodic()
 std::string function_state()
 {
     if (function == Function::Singleshot) {
-        return m5::utility::formatString("Singleshot #%u", ss_count);
+        return m5::utility::formatString("Singleshot #%" PRIu32, ss_count);
     }
     return function_name[m5::stl::to_underlying(function)];
 }
