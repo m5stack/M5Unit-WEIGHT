@@ -5,12 +5,20 @@
  */
 /*
   Example using M5UnitUnified for UnitWeightI2C
+
+  Prints the weight of each measurement to the serial output (Serial Plotter format),
+  and draws it when the board has a screen.
+
+  BtnA: click to run the selected function, double click to select the next function, hold to tare
+  Functions: Float (periodic, float) -> Int (periodic, weight x100) -> Singleshot (one text measurement per click)
 */
 #include <cinttypes>
+#include <string>
 
 #include <M5Unified.h>
 #include <M5UnitUnified.h>
 #include <M5UnitUnifiedWEIGHT.h>
+#include <M5Utility.h>
 #include <wiring/m5_unit_unified_wiring.hpp>  // Board-aware connection helpers (include last)
 
 using m5::unit::weighti2c::Mode;
@@ -20,8 +28,117 @@ auto& lcd = M5.Display;
 m5::unit::UnitUnified Units;
 m5::unit::UnitWeightI2C unit;
 
-uint32_t idx{};
-constexpr Mode mode_table[] = {Mode::Float, Mode::Int};
+constexpr uint32_t notice_duration{1000};  // How long a notice is shown (ms)
+
+LGFX_Sprite sprite;
+bool has_lcd{};
+float number_scale{1.0f};  // Text size of the weight
+float label_scale{1.0f};   // Text size of the function state
+std::string value_text{};  // Weight shown at the center
+bool redraw{true};
+const char* notice{};  // Shown instead of the weight for a while (e.g. after tare)
+m5::utility::elapsed_time_t notice_at{};
+
+// BtnA: single click runs the selected function, double click selects the next one, hold tares
+enum class Function : uint8_t { Float, Int, Singleshot };
+constexpr const char* function_name[] = {"Float", "Int (x100)", "Singleshot"};
+// Text color for each function (RGB888)
+constexpr uint32_t function_color[] = {0x66CCFFU /* Sky blue */, 0xFFB400U /* Orange */, 0xCC66FFU /* Lavender */};
+
+Function function{Function::Float};
+uint32_t ss_count{};
+
+bool start_periodic()
+{
+    const Mode mode = (function == Function::Int) ? Mode::Int : Mode::Float;
+    return unit.startPeriodicMeasurement(mode, unit.config().interval);
+}
+
+// Selected function and its current state
+std::string function_state()
+{
+    if (function == Function::Singleshot) {
+        return m5::utility::formatString("Singleshot #%u", ss_count);
+    }
+    return function_name[m5::stl::to_underlying(function)];
+}
+
+void run_function()
+{
+    if (function != Function::Singleshot) {
+        return;  // Float / Int: nothing to do
+    }
+    char buf[16]{};  // The unit returns up to 15 characters
+    if (unit.measureSingleshot(buf)) {
+        ++ss_count;
+        M5.Log.printf(">Singleshot:%s\n", buf);
+        value_text = buf;
+    } else {
+        M5_LOGE("Failed to measure");
+    }
+    redraw = true;
+}
+
+void select_next_function()
+{
+    auto next = m5::stl::to_underlying(function) + 1;
+    if (next >= m5::stl::size(function_name)) {
+        next = 0;
+    }
+    function = static_cast<Function>(next);
+
+    // Singleshot measures only while periodic measurement is stopped
+    unit.stopPeriodicMeasurement();
+    if (function == Function::Singleshot) {
+        ss_count = 0;
+    } else {
+        start_periodic();
+    }
+    value_text.clear();
+    M5.Log.printf("Function: %s\n", function_state().c_str());
+    redraw = true;
+}
+
+void tare()
+{
+    const bool success = unit.resetOffset();
+    M5.Log.printf("Tare: %s\n", success ? "OK" : "FAILED");
+    notice    = success ? "TARE" : "FAILED";
+    notice_at = m5::utility::millis();
+    redraw    = true;
+}
+
+void handle_button()
+{
+    if (M5.BtnA.wasSingleClicked()) {
+        run_function();
+    } else if (M5.BtnA.wasDoubleClicked()) {
+        select_next_function();
+    } else if (M5.BtnA.wasHold()) {
+        tare();
+    }
+}
+
+void draw_lcd()
+{
+    sprite.setPaletteColor(1, function_color[m5::stl::to_underlying(function)]);
+    sprite.fillSprite(0);
+    sprite.setFont(&fonts::Orbitron_Light_32);
+    sprite.setTextDatum(middle_center);
+    sprite.setTextSize(number_scale, number_scale);
+    if (notice) {
+        sprite.drawString(notice, sprite.width() / 2, sprite.height() / 2);
+    } else if (!value_text.empty()) {
+        sprite.drawString(value_text.c_str(), sprite.width() / 2, sprite.height() / 2);
+    }
+    sprite.setFont(&fonts::Font0);
+    sprite.setTextSize(label_scale, label_scale);
+    sprite.setTextDatum(top_left);
+    sprite.drawString(function_state().c_str(), 2, 2);
+    sprite.setTextDatum(bottom_right);
+    sprite.drawString("g", sprite.width() - 2, sprite.height() - 2);
+    sprite.pushSprite(&lcd, 0, 0);
+}
 
 }  // namespace
 
@@ -54,53 +171,60 @@ void setup()
 
     M5_LOGI("M5UnitUnified initialized");
     M5_LOGI("%s", Units.debugInfo().c_str());
+    M5_LOGI("BtnA: click to run, double click to select the function, hold to tare");
 
-    lcd.fillScreen(TFT_DARKGREEN);
+    // Display setup (skip for no-LCD or EPD devices)
+    has_lcd = lcd.width() > 0 && lcd.height() > 0 && !lcd.isEPD();
+    if (has_lcd) {
+        sprite.setPsram(false);
+        sprite.setColorDepth(1);  // Two colors: background and text
+        has_lcd = sprite.createSprite(lcd.width(), lcd.height());
+    }
+    if (has_lcd) {
+        sprite.setPaletteColor(0, TFT_BLACK);
+        sprite.setTextColor(1, 0);
+        // Fit "-0000.00" into 90% of the width
+        sprite.setFont(&fonts::Orbitron_Light_32);
+        sprite.setTextSize(1);
+        number_scale = sprite.width() * 0.9f / sprite.textWidth("-0000.00");
+        label_scale  = (lcd.width() >= 320) ? 2.0f : 1.0f;
+        sprite.fillSprite(0);
+        sprite.pushSprite(&lcd, 0, 0);
+    }
 }
 
 void loop()
 {
     M5.update();
-
     Units.update();
+
     if (unit.updated()) {
         // Can be checked e.g. by serial plotters
-        if (!idx) {
-            M5.Log.printf(">Weight:%f\n", unit.weight());
+        std::string text{};
+        if (function == Function::Int) {
+            const int32_t iw = unit.iweight();
+            M5.Log.printf(">iWeight:%" PRId32 "\n", iw);
+            text = m5::utility::formatString("%" PRId32, iw);  // Raw value (weight x100)
         } else {
-            M5.Log.printf(">iWeight:%" PRId32 "\n", unit.iweight());
+            const float w = unit.weight();
+            M5.Log.printf(">Weight:%f\n", w);
+            text = m5::utility::formatString("%.2f", w);
+        }
+        if (text != value_text) {
+            value_text = text;
+            redraw     = true;
         }
     }
 
-    // Behavior when BtnA is clicked changes depending on the value.
-    constexpr int32_t BTN_A_FUNCTION{0};
+    handle_button();
 
-    if (M5.BtnA.wasClicked()) {
-        switch (BTN_A_FUNCTION) {
-            case 0: {  // Change mode
-                if (++idx > 1) {
-                    idx = 0;
-                }
-                unit.stopPeriodicMeasurement();
-                unit.startPeriodicMeasurement(mode_table[idx]);
-            } break;
-            case 1: {  // Singleshot as text
-                static uint32_t sscnt{};
-                unit.stopPeriodicMeasurement();
-                char txt[16]{};
-                if (unit.measureSingleshot(txt)) {
-                    M5.Log.printf(">Singleshot:%s\n", txt);
-                } else {
-                    M5_LOGE("Failed to measure");
-                }
-                // Return to periodic measurement after 8 measurements
-                if (++sscnt >= 8) {
-                    sscnt = 0;
-                    unit.startPeriodicMeasurement(Mode::Float);
-                }
-
-            } break;
-        }
+    if (notice && m5::utility::hasElapsed(notice_at, notice_duration)) {
+        notice = nullptr;
+        redraw = true;
+    }
+    if (has_lcd && redraw) {
+        redraw = false;
+        draw_lcd();
     }
 }
 
