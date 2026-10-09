@@ -31,6 +31,21 @@ See also examples using conventional methods here.
 ## Examples
 See also [examples/UnitUnified](examples/UnitUnified)
 
+- UnitWeightI2C/PlotToSerial: Outputs the weight of each periodic measurement for a serial plotter
+- UnitMiniScales/PlotToSerial: The same, and changes the LED color with the weight
+- ViaPaHub: Uses UnitWeightI2C (ch:0) and UnitMiniScales (ch:1) through one PaHub (requires [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB))
+
+## Support via [PaHub](https://docs.m5stack.com/en/unit/Unit-PaHub%20v2.1)
+
+|Unit|Support|Note|
+|---|---|---|
+|UnitWeightI2C|OK|See the `ViaPaHub` example|
+|UnitMiniScales|OK|See the `ViaPaHub` example|
+
+Both units use the same I2C address (0x26). Connect them to different PaHub channels to use them at the same time.
+
+See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
+
 
 
 ### Doxygen document
