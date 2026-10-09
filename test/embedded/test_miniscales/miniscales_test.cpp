@@ -97,3 +97,27 @@ TEST_F(TestMiniScales, Button)
     EXPECT_FALSE(unit->wasPressed());
     EXPECT_FALSE(unit->wasReleased());
 }
+
+TEST_F(TestMiniScales, BeginAppliesManageButtonStatus)
+{
+    SCOPED_TRACE(ustr);
+
+    // begin fails while periodic measurement is running
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    auto cfg                 = unit->config();
+    cfg.manage_button_status = false;
+    unit->config(cfg);
+    EXPECT_TRUE(unit->begin());
+    EXPECT_FALSE(unit->config().manage_button_status);
+
+    // Button state is not updated, so no edge appears
+    unit->update(true);
+    EXPECT_FALSE(unit->wasPressed());
+    EXPECT_FALSE(unit->wasReleased());
+
+    // Restore
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    cfg.manage_button_status = true;
+    unit->config(cfg);
+    EXPECT_TRUE(unit->begin());
+}

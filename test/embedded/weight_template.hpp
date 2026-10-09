@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 /*
-  Unit test template for UnitWeightI2C and inherited classes
+  Unit tests for UnitWeightI2C (also included by the UnitMiniScales test)
 */
 #include <gtest/gtest.h>
 #include <Wire.h>
@@ -77,6 +77,24 @@ TEST_F(TestWeightI2C, CheckConfig)
     EXPECT_EQ(ema, 56);
     EXPECT_EQ(unit->interval(), 78);
     EXPECT_TRUE(unit->inPeriodic());
+
+    // mode is applied by begin (begin fails while periodic measurement is running)
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    cfg.mode = Mode::Int;
+    unit->config(cfg);
+    EXPECT_TRUE(unit->begin());
+    {
+        auto r = collect_periodic_measurements(unit.get(), 1);
+        EXPECT_FALSE(r.timed_out);
+        EXPECT_FALSE(std::isfinite(unit->weight()));
+        EXPECT_NE(unit->iweight(), std::numeric_limits<int32_t>::min());
+    }
+
+    // Restore
+    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    cfg.mode = Mode::Float;
+    unit->config(cfg);
+    EXPECT_TRUE(unit->begin());
 }
 
 TEST_F(TestWeightI2C, Settings)
@@ -132,6 +150,7 @@ TEST_F(TestWeightI2C, Settings)
             EXPECT_EQ(level, tmp);
 
         } else {
+            EXPECT_FALSE(unit->writeAvgFilterLevel(level));
             EXPECT_TRUE(unit->readAvgFilterLevel(tmp));
             EXPECT_EQ(prev, tmp);
         }
@@ -153,6 +172,7 @@ TEST_F(TestWeightI2C, Settings)
             EXPECT_TRUE(unit->readEmaFilterAlpha(tmp));
             EXPECT_EQ(alpha, tmp);
         } else {
+            EXPECT_FALSE(unit->writeEmaFilterAlpha(alpha));
             EXPECT_TRUE(unit->readEmaFilterAlpha(tmp));
             EXPECT_EQ(prev, tmp);
         }
@@ -184,6 +204,7 @@ TEST_F(TestWeightI2C, Singleshot)
                 EXPECT_EQ(d.iweight(), std::numeric_limits<int32_t>::min());
             } else {
                 EXPECT_FALSE(std::isfinite(d.weight()));
+                EXPECT_NE(d.iweight(), std::numeric_limits<int32_t>::min());
             }
         }
         char txt[16]{};
@@ -232,6 +253,7 @@ TEST_F(TestWeightI2C, Periodic)
                 EXPECT_EQ(unit->iweight(), std::numeric_limits<int32_t>::min());
             } else {
                 EXPECT_FALSE(std::isfinite(unit->weight()));
+                EXPECT_NE(unit->iweight(), std::numeric_limits<int32_t>::min());
             }
             unit->discard();
             EXPECT_FALSE(unit->empty());
@@ -272,12 +294,17 @@ TEST_F(TestWeightI2C, NegativeGap)
     float w_pos = d_pos.weight();
     EXPECT_TRUE(std::isfinite(w_pos));
 
-    // Write negative GAP and re-begin
+    // Write negative GAP, read it back and re-begin
     EXPECT_TRUE(unit->writeGap(-pos_gap));
+    {
+        float g{};
+        EXPECT_TRUE(unit->readGap(g));
+        EXPECT_FLOAT_EQ(g, -pos_gap);
+    }
     EXPECT_TRUE(unit->begin());
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
 
-    // Firmware returns same sign regardless of GAP sign
+    // The sign of the weight cannot be checked without a load; only the read-back is checked
     Data d_neg{};
     EXPECT_TRUE(unit->measureSingleshot(d_neg, Mode::Float));
     float w_neg = d_neg.weight();
@@ -300,23 +327,23 @@ TEST_F(TestWeightI2C, ChangeI2CAddress)
     EXPECT_FALSE(unit->changeI2CAddress(0x07));  // Invalid
     EXPECT_FALSE(unit->changeI2CAddress(0x78));  // Invalid
 
-    // Change to 0x10
-    EXPECT_TRUE(unit->changeI2CAddress(0x10));
+    // Change to 0x0A
+    EXPECT_TRUE(unit->changeI2CAddress(0x0A));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x10);
-    EXPECT_EQ(unit->address(), 0x10);
+    EXPECT_EQ(addr, 0x0A);
+    EXPECT_EQ(unit->address(), 0x0A);
 
-    // Change to 0x77
-    EXPECT_TRUE(unit->changeI2CAddress(0x77));
+    // Change to 0x74
+    EXPECT_TRUE(unit->changeI2CAddress(0x74));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x77);
-    EXPECT_EQ(unit->address(), 0x77);
+    EXPECT_EQ(addr, 0x74);
+    EXPECT_EQ(unit->address(), 0x74);
 
-    // Change to 0x52
-    EXPECT_TRUE(unit->changeI2CAddress(0x52));
+    // Change to 0x5B
+    EXPECT_TRUE(unit->changeI2CAddress(0x5B));
     EXPECT_TRUE(unit->readI2CAddress(addr));
-    EXPECT_EQ(addr, 0x52);
-    EXPECT_EQ(unit->address(), 0x52);
+    EXPECT_EQ(addr, 0x5B);
+    EXPECT_EQ(unit->address(), 0x5B);
 
     // Change to default
     EXPECT_TRUE(unit->changeI2CAddress(UnitWeightI2C::DEFAULT_ADDRESS));
