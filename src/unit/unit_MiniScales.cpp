@@ -60,7 +60,7 @@ bool UnitMiniScales::readLEDColor(uint8_t& r, uint8_t& g, uint8_t& b)
 
 bool UnitMiniScales::writeLEDColor(const uint8_t r, const uint8_t g, const uint8_t b)
 {
-    uint8_t color[3] = {r, g, b};
+    const uint8_t color[3]{r, g, b};
     return writeRegister(RGB_LED_REG, color, 3U);
 }
 
