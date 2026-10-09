@@ -78,8 +78,8 @@ TEST_F(TestWeightI2C, CheckConfig)
     EXPECT_EQ(unit->interval(), 78);
     EXPECT_TRUE(unit->inPeriodic());
 
-    // mode is applied by begin (begin fails while periodic measurement is running)
-    EXPECT_TRUE(unit->stopPeriodicMeasurement());
+    // begin can be called again while measuring, and applies the new mode
+    EXPECT_TRUE(unit->inPeriodic());
     cfg.mode = Mode::Int;
     unit->config(cfg);
     EXPECT_TRUE(unit->begin());
@@ -91,7 +91,6 @@ TEST_F(TestWeightI2C, CheckConfig)
     }
 
     // Restore
-    EXPECT_TRUE(unit->stopPeriodicMeasurement());
     cfg.mode = Mode::Float;
     unit->config(cfg);
     EXPECT_TRUE(unit->begin());

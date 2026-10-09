@@ -34,6 +34,9 @@ bool UnitWeightI2C::begin()
         }
     }
 
+    // Restart from idle so that begin() can be called again while measuring
+    stop_periodic_measurement();
+
     // WeightI2C/MiniScales use HX711. Wait for power-up/reset settling (RATE=0: up to about 400ms)
     // so the first weight readings are stable.
     m5::utility::delay(400);
