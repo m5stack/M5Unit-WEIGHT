@@ -11,10 +11,9 @@ The Weight I2C Unit is a weight acquisition transducer unit that employs the "ST
 
 ### SKU:U177
 
-Mini Scales Unit is an integrated mini weighing unit that combines a 5kg weighing sensor, an ADC acquisition chip (HX711), and a protocol conversion MCU to directly output weighing results. The product is equipped with an STM32F030F4P6 microcontroller, uses the I2C communication protocol for external communication, and supports multiple modules working together.
+Mini Scales Unit is an integrated mini weighing unit that combines a 5kg weighing sensor, an ADC acquisition chip (HX711), and a protocol conversion MCU to directly output weighing results. The product is equipped with an STM32F030F4P6 microcontroller, uses the I2C communication protocol for external communication, and supports multiple modules working together. It also features an SK6812 RGB LED and a function button, making it easy to perform zero calibration and tare.
 
 ## Related Link
-See also examples using conventional methods here.
 
 - [Unit WeightI2C & Datasheet](https://docs.m5stack.com/en/unit/Unit-Weight%20I2C)
 - [Unit MiniScales & Datasheet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
@@ -74,6 +73,5 @@ If you want to output Git commit hashes to html, do it for the git cloned folder
 
 #### Required
 - [Doxygen](https://www.doxygen.nl/)
-- [pcregrep](https://formulae.brew.sh/formula/pcre2)
 - [Git](https://git-scm.com/) (Output commit hash to html)
 
