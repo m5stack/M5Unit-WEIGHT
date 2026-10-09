@@ -50,12 +50,12 @@ idf.py build flash monitor
 
 |Unit|Support|Note|
 |---|---|---|
-|UnitWeightI2C|OK|See the `ViaPaHub` example|
-|UnitMiniScales|OK|See the `ViaPaHub` example|
+|UnitWeightI2C|OK||
+|UnitMiniScales|OK||
 
 Both units use the same I2C address (0x26). Connect them to different PaHub channels to use them at the same time.
 
-See also [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
+See also the [ViaPaHub](examples/UnitUnified/ViaPaHub) example (UnitWeightI2C / UnitMiniScales on one PaHub) and [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
 
 
 
