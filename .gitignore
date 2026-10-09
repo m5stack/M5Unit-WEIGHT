@@ -37,8 +37,19 @@ docs/html/
 # PlatformIO
 .pio/
 
+# ESP-IDF (idf.py) build artifacts
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+
 # IDE
 .vscode/
+.clangd
+
+# clangd index cache
+.cache/
 
 # macOS
 .DS_Store

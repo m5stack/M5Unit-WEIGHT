@@ -1,0 +1,107 @@
+name: Build(esp-idf-native)
+
+on:
+  push:
+    tags-ignore:
+      - '*.*.*'
+      - 'v*.*.*'
+    branches:
+      - '*'
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'examples/UnitUnified/**'
+      - 'CMakeLists.txt'
+      - 'idf_component.yml'
+      - '.github/workflows/esp-idf-build-check.yml'
+  pull_request:
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'examples/UnitUnified/**'
+      - 'CMakeLists.txt'
+      - 'idf_component.yml'
+      - '.github/workflows/esp-idf-build-check.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The units have no Kconfig USING_* variant, so the matrix has the unit axis and the chip axis:
+# esp32 = classic Xtensa dual-core, esp32s3 = LCD-capable dual-core Xtensa with PSRAM,
+# esp32c3 = RISC-V single-core (StampC3), esp32c6 (NanoC6) / esp32h2 (NanoH2) = RISC-V single-core which
+# exercises the app_main CONFIG_FREERTOS_UNICORE feedIdle branch, esp32c5 = RISC-V single-core supported from
+# IDF 5.5 (so it is on the v5.5.4 row only), esp32p4 (M5Stack Tab5) = RISC-V dual-core;
+# the sdkconfig.defaults.esp32p4 overlay (chip-rev minimum keys) is auto-applied.
+# esp32s2 is not a target: M5Unified / M5GFX, which the examples use, do not build it (M5GFX 0.2.32 fails in
+# Bus_SPI.hpp with -Werror=array-bounds on IDF 5.5). Add it when they support it.
+# esp32c61 is not a target until there is M5Stack hardware with it (M5UnitUnified itself already builds it).
+jobs:
+  build-chips:
+    name: ${{ matrix.idf }} ${{ matrix.target }} ${{ matrix.unit }} PlotToSerial
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        # Both units are I2C units sharing the same register map (UnitMiniScales derives from UnitWeightI2C),
+        # but each example is built on every chip with the latest 5.x.
+        unit: [UnitWeightI2C, UnitMiniScales]
+        target: [esp32, esp32s3, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4]
+        idf: [v5.5.4]
+        # idf boundaries: 5.1.7 = oldest legacy-driver (5.0.x dropped: M5GFX needs esp_mm added
+        # in 5.1), 5.4.4 = new driver/*_master.h era, 5.5.4 = latest 5.x, 6.1 = latest 6.x.
+        # 6.x matters because default warnings become errors there (CONFIG_COMPILER_DISABLE_DEFAULT_ERRORS
+        # defaults to n and common/sdkconfig.defaults does not override it), and GCC 15 / C++26 is the default.
+        # The idf axis is built for one representative unit only (UnitWeightI2C), because the
+        # I2C driver is what changes across these versions (__has_include(<driver/i2c_master.h>)).
+        # esp32c6 x v5.1.7 is kept because it is the only combination of the legacy driver with a single core
+        # RISC-V chip that has LP I2C.
+        include:
+          - {unit: UnitWeightI2C, target: esp32, idf: v5.1.7}    # oldest legacy driver
+          - {unit: UnitWeightI2C, target: esp32, idf: v5.4.4}    # first new driver era
+          - {unit: UnitWeightI2C, target: esp32, idf: v6.1}      # warnings are errors by default, GCC 15
+          - {unit: UnitWeightI2C, target: esp32c6, idf: v5.1.7}  # legacy driver on a single core RISC-V chip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: ${{ matrix.target }}
+          path: examples/UnitUnified/${{ matrix.unit }}/PlotToSerial
+
+  # The hub example only adds the hub (M5Unit-HUB, example-only dependency) on top of the library, whose chip and
+  # idf axes are already covered by build-chips. Build it on the representative chip with the latest 5.x only.
+  build-hubs:
+    name: v5.5.4 esp32 ${{ matrix.example }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        example:
+          - ViaPaHub
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.4
+          target: esp32
+          path: examples/UnitUnified/${{ matrix.example }}

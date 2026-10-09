@@ -1,0 +1,40 @@
+description: Library for M5Stack UNIT WEIGHT using M5UnitUnified.
+url: https://github.com/m5stack/M5Unit-WEIGHT
+issues: https://github.com/m5stack/M5Unit-WEIGHT/issues
+license: MIT
+version: "0.1.1"
+
+dependencies:
+  idf: ">=5.1"
+  # M5UnitUnified is not yet on the ESP Component Registry, so reference the main
+  # branch via git (switch to a version constraint after publish).
+  m5stack/M5UnitUnified:
+    git: https://github.com/m5stack/M5UnitUnified.git
+    version: main
+  # The public headers include m5_utility/container/circular_buffer.hpp, so M5Utility is a
+  # direct dependency. Declaring it here does not conflict with the one M5UnitUnified pulls in:
+  # the same git URL and ref resolve to a single component.
+  m5stack/M5Utility:
+    git: https://github.com/m5stack/M5Utility.git
+    version: main
+
+targets:
+  - esp32
+  - esp32s3
+  - esp32c3
+  - esp32c5
+  - esp32c6
+  - esp32h2
+  - esp32p4
+
+files:
+  exclude:
+    - "docs/**"
+    - "examples/**"
+    - "test/**"
+    - "boards/**"
+    - ".clang-format"
+    - ".gitignore"
+    - "platformio.ini"
+    - "library.json"
+    - "library.properties"

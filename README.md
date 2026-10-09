@@ -35,6 +35,18 @@ See also [examples/UnitUnified](examples/UnitUnified)
 - UnitMiniScales/PlotToSerial: The same, and changes the LED color with the weight
 - ViaPaHub: Uses UnitWeightI2C (ch:0) and UnitMiniScales (ch:1) through one PaHub (requires [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB))
 
+### For ESP-IDF settings
+
+> **NOTE:** The ESP-IDF native build (`idf.py`) targets ESP-IDF **5.1 or later** (5.x and 6.x).
+
+Each example covers a single unit (or a fixed set of units for ViaPaHub), so the examples need no Kconfig choice. Build them directly:
+
+```sh
+cd examples/UnitUnified/UnitWeightI2C/PlotToSerial
+idf.py set-target esp32s3               # or esp32 / esp32c5 / esp32c6 / esp32h2 / esp32p4 / ...
+idf.py build flash monitor
+```
+
 ## Support via [PaHub](https://docs.m5stack.com/en/unit/Unit-PaHub%20v2.1)
 
 |Unit|Support|Note|
