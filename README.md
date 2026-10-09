@@ -18,7 +18,7 @@ Mini Scales Unit is an integrated mini weighing unit that combines a 5kg weighin
 - [Unit WeightI2C & Datasheet](https://docs.m5stack.com/en/unit/Unit-Weight%20I2C)
 - [Unit MiniScales & Datasheet](https://docs.m5stack.com/en/unit/Unit-Mini%20Scales)
 
-### Required Libraries:
+## Required Libraries
 - [M5UnitUnified](https://github.com/m5stack/M5UnitUnified)
 - [M5Utility](https://github.com/m5stack/M5Utility)
 - [M5HAL](https://github.com/m5stack/M5HAL)
@@ -57,9 +57,7 @@ Both units use the same I2C address (0x26). Connect them to different PaHub chan
 
 See also the [ViaPaHub](examples/UnitUnified/ViaPaHub) example (UnitWeightI2C / UnitMiniScales on one PaHub) and [M5Unit-HUB](https://github.com/m5stack/M5Unit-HUB)
 
-
-
-### Doxygen document
+## Doxygen document
 [GitHub Pages](https://m5stack.github.io/M5Unit-WEIGHT/)
 
 If you want to generate documents on your local machine, execute the following command
@@ -71,7 +69,7 @@ bash docs/doxy.sh
 It will output it under docs/html  
 If you want to output Git commit hashes to html, do it for the git cloned folder.
 
-#### Required
+### Required
 - [Doxygen](https://www.doxygen.nl/)
 - [Git](https://git-scm.com/) (Output commit hash to html)
 
