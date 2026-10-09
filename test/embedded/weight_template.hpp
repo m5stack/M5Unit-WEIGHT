@@ -48,7 +48,6 @@ TEST_F(TestWeightI2C, CheckConfig)
     EXPECT_TRUE(unit->stopPeriodicMeasurement());
     EXPECT_FALSE(unit->inPeriodic());
 
-    //
     auto cfg           = unit->config();
     cfg.interval       = 78;
     cfg.start_periodic = false;
@@ -58,7 +57,6 @@ TEST_F(TestWeightI2C, CheckConfig)
     EXPECT_FALSE(unit->inPeriodic());
     EXPECT_NE(unit->interval(), 78);
 
-    //
     cfg.lp_enable        = false;
     cfg.avg_filter_level = 34;
     cfg.ema_filter_alpha = 56;
@@ -79,11 +77,11 @@ TEST_F(TestWeightI2C, CheckConfig)
     EXPECT_TRUE(unit->inPeriodic());
 
     // begin can be called again while measuring, and applies the new mode
-    EXPECT_TRUE(unit->inPeriodic());
     cfg.mode = Mode::Int;
     unit->config(cfg);
     EXPECT_TRUE(unit->begin());
     {
+        unit->flush();  // Drop samples measured in Float mode before checking Int mode
         auto r = collect_periodic_measurements(unit.get(), 1);
         EXPECT_FALSE(r.timed_out);
         EXPECT_FALSE(std::isfinite(unit->weight()));
@@ -112,7 +110,6 @@ TEST_F(TestWeightI2C, Settings)
         EXPECT_TRUE(unit->writeGap(gap));
         float gap2{};
         EXPECT_TRUE(unit->readGap(gap2));
-        // M5_LOGI("GAP:%f/%f", gap, gap2);
         EXPECT_EQ(gap, gap2);
         m5::utility::delay(1);
     }
@@ -131,7 +128,6 @@ TEST_F(TestWeightI2C, Settings)
         SCOPED_TRACE(testing::Message() << "lp=" << lp);
         EXPECT_TRUE(unit->enableLPFilter(lp));
         EXPECT_TRUE(unit->isEnabledLPFilter(tmp));
-        // M5_LOGI("%u/%u", lp, tmp);
         EXPECT_EQ(lp, tmp);
     }
 
@@ -140,7 +136,6 @@ TEST_F(TestWeightI2C, Settings)
         uint8_t level{}, tmp{}, prev{};
         level = esp_random() & 0x7F;  // 0-127
         SCOPED_TRACE(testing::Message() << "avg_filter_level=" << static_cast<unsigned>(level));
-        // M5_LOGW("lv:%u", level);
 
         EXPECT_TRUE(unit->readAvgFilterLevel(prev));
         if (level <= 50) {
@@ -163,7 +158,6 @@ TEST_F(TestWeightI2C, Settings)
         uint8_t alpha{}, tmp{}, prev{};
         alpha = esp_random() & 0x7F;
         SCOPED_TRACE(testing::Message() << "ema_filter_alpha=" << static_cast<unsigned>(alpha));
-        // M5_LOGW("alpha:%u", alpha);
 
         EXPECT_TRUE(unit->readEmaFilterAlpha(prev));
         if (alpha <= 99) {

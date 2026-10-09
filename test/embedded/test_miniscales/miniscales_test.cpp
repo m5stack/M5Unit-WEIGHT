@@ -94,6 +94,7 @@ TEST_F(TestMiniScales, Button)
     EXPECT_FALSE(press);
 
     unit->update();
+    EXPECT_FALSE(unit->isPressed());
     EXPECT_FALSE(unit->wasPressed());
     EXPECT_FALSE(unit->wasReleased());
 }
