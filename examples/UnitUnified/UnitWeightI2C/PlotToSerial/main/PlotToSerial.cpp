@@ -136,7 +136,8 @@ void draw_lcd()
     sprite.setTextDatum(top_left);
     sprite.drawString(function_state().c_str(), 2, 2);
     sprite.setTextDatum(bottom_right);
-    sprite.drawString("g", sprite.width() - 2, sprite.height() - 2);
+    // Int shows the raw value of the unit (weight x100)
+    sprite.drawString(function == Function::Int ? "x0.01 g" : "g", sprite.width() - 2, sprite.height() - 2);
     sprite.pushSprite(&lcd, 0, 0);
 }
 

@@ -12,7 +12,7 @@
   BtnA: click to run the selected function, double click to select the next function, hold to tare
   Functions: Float (periodic, float) -> Int (periodic, weight x100) -> Singleshot (one text measurement per click)
   The LED of the unit lights in the function color, brighter as the weight increases (up to 5 kg).
-  The button of the unit turns the LED on/off.
+  The button of the unit tares by the unit firmware itself; the example only shows TARE.
 */
 #include <cinttypes>
 #include <cmath>
@@ -54,15 +54,11 @@ uint32_t ss_count{};
 
 constexpr float WEIGHT_MIN{0.0f};
 constexpr float WEIGHT_MAX{5000.0f};  // MiniScales: 5kg load cell
-bool led_enabled{true};
-float last_weight{};  // Latest weight (g) for the LED
+float last_weight{};                  // Latest weight (g) for the LED
 
 // LED shows the function color (same as the text), brighter as the weight increases
 void update_led()
 {
-    if (!led_enabled) {
-        return;
-    }
     const float t     = std::fmin(1.0f, std::fmax(0.0f, (last_weight - WEIGHT_MIN) / (WEIGHT_MAX - WEIGHT_MIN)));
     const float level = 0.1f + 0.9f * t;  // Keep it dimly lit at 0 g
     const uint32_t c  = function_color[m5::stl::to_underlying(function)];
@@ -161,7 +157,8 @@ void draw_lcd()
     sprite.setTextDatum(top_left);
     sprite.drawString(function_state().c_str(), 2, 2);
     sprite.setTextDatum(bottom_right);
-    sprite.drawString("g", sprite.width() - 2, sprite.height() - 2);
+    // Int shows the raw value of the unit (weight x100)
+    sprite.drawString(function == Function::Int ? "x0.01 g" : "g", sprite.width() - 2, sprite.height() - 2);
     sprite.pushSprite(&lcd, 0, 0);
 }
 
@@ -243,14 +240,12 @@ void loop()
         }
     }
 
-    // Button on MiniScales: toggle LED ON/OFF
+    // Button on MiniScales: the unit firmware tares while it is pressed, so just show it
     if (unit.wasPressed()) {
-        led_enabled = !led_enabled;
-        if (led_enabled) {
-            update_led();
-        } else {
-            unit.writeLEDColor(0, 0, 0);
-        }
+        M5.Log.printf("Unit button: tare\n");
+        notice    = "TARE";
+        notice_at = m5::utility::millis();
+        redraw    = true;
     }
 
     handle_button();
