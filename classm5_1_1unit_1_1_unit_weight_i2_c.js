@@ -1,9 +1,10 @@
 var classm5_1_1unit_1_1_unit_weight_i2_c =
 [
     [ "config_t", "structm5_1_1unit_1_1_unit_weight_i2_c_1_1config__t.html", "structm5_1_1unit_1_1_unit_weight_i2_c_1_1config__t" ],
+    [ "UnitWeightI2C", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a439247e1ea05a0826df504d2f8d9a934", null ],
     [ "begin", "classm5_1_1unit_1_1_unit_weight_i2_c.html#afd2b5fb40997fa630e80bda276c0f051", null ],
     [ "changeI2CAddress", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a4c156f5f83172bc4cf44d89ce27e2f42", null ],
-    [ "config", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a3a104b019e5f9087aad9e4b5ca129ad3", null ],
+    [ "config", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a565fb141e99b19b5928a492e472f1afa", null ],
     [ "config", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a5dc1d23e9f95c6502e259f6a4bd0f445", null ],
     [ "enableLPFilter", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a9c010e7a592348339cbe8c5c5bec39c1", null ],
     [ "isEnabledLPFilter", "classm5_1_1unit_1_1_unit_weight_i2_c.html#a3931cec60fc493bcdc5f7849bc368aa8", null ],
