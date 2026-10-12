@@ -26,7 +26,10 @@ namespace weighti2c {
   @enum Mode
   @brief Measurement mode
  */
-enum class Mode : uint8_t { Float, Int };
+enum class Mode : uint8_t {
+    Float,  //!< Weight as IEEE 754 float (g)
+    Int,    //!< Weight x100 as int32 (0.01 g)
+};
 
 /*!
   @struct Data
@@ -35,7 +38,7 @@ enum class Mode : uint8_t { Float, Int };
 struct Data {
     static_assert(sizeof(float) == 4, "Invalid float size");  // I2C protocol assumes IEEE 754 float (4 bytes)
     std::array<uint8_t, 4> raw{};                             //!< RAW data
-    //!< True if the payload should be interpreted with weight()
+    //! True if the payload should be interpreted with weight()
     bool is_float{};
 
     /*!
@@ -57,16 +60,14 @@ struct Data {
      */
     inline int32_t iweight() const
     {
-        return !is_float
-                   ? static_cast<int32_t>(static_cast<uint32_t>(raw[0]) | (static_cast<uint32_t>(raw[1]) << 8) |
-                                          (static_cast<uint32_t>(raw[2]) << 16) | (static_cast<uint32_t>(raw[3]) << 24))
-                   : std::numeric_limits<int32_t>::min();
+        return !is_float ? m5::types::little_int32_t(raw[0], raw[1], raw[2], raw[3]).get()
+                         : std::numeric_limits<int32_t>::min();
     }
 };
 }  // namespace weighti2c
 
 /*!
-  @class UnitWeightI2C
+  @class m5::unit::UnitWeightI2C
   @brief WeightI2C unit
 */
 class UnitWeightI2C : public Component, public PeriodicMeasurementAdapter<UnitWeightI2C, weighti2c::Data> {
@@ -80,7 +81,7 @@ public:
     struct config_t {
         //! Enable the Low-Pass Filter
         bool lp_enable{true};
-        //! Averaging Filter level (0 - 50)
+        //! Averaging Filter level (0-50)
         uint8_t avg_filter_level{10};
         //! Exponential Moving Average Filter alpha (0-99)
         uint8_t ema_filter_alpha{10};
@@ -92,6 +93,10 @@ public:
         uint32_t interval{80};
     };
 
+    /*!
+      @brief Constructor
+      @param addr I2C address
+     */
     explicit UnitWeightI2C(const uint8_t addr = DEFAULT_ADDRESS)
         : Component(addr), _data{new m5::container::CircularBuffer<weighti2c::Data>(1)}
     {
@@ -106,6 +111,8 @@ public:
     /*!
       @brief Initialize the unit and apply the current configuration
       @return True if successful
+      @note Blocks for 400 ms (HX711 settling) plus up to 1.5 s waiting for the unit to respond
+      @note A running periodic measurement is stopped and restarted with the configuration
      */
     virtual bool begin() override;
     /*!
@@ -116,12 +123,18 @@ public:
 
     ///@name Settings for begin
     ///@{
-    /*! @brief Gets the configuration */
-    inline config_t config()
+    /*!
+      @brief Gets the configuration
+      @return Current configuration
+     */
+    inline config_t config() const
     {
         return _cfg;
     }
-    //! @brief Set the configuration
+    /*!
+      @brief Sets the configuration
+      @param cfg Configuration
+     */
     inline void config(const config_t& cfg)
     {
         _cfg = cfg;
@@ -133,6 +146,7 @@ public:
     ///@{
     /*!
       @brief Oldest measured weight (float)
+      @return Weight, or NaN if no data or the data was measured in Int mode
       @warning Valid only when periodic measurement uses Float mode. Use `iweight()` for Int mode.
      */
     inline float weight() const
@@ -140,7 +154,8 @@ public:
         return !empty() ? oldest().weight() : std::numeric_limits<float>::quiet_NaN();
     }
     /*!
-      @brief Oldest measured weight (integer)
+      @brief Oldest measured weight x100 (integer)
+      @return Weight x100, or INT32_MIN if no data or the data was measured in Float mode
       @warning Valid only when periodic measurement uses Int mode. Use `weight()` for Float mode.
      */
     inline int32_t iweight() const
@@ -154,8 +169,9 @@ public:
     /*!
       @brief Start periodic measurement
       @param mode Measurement mode
-      @param interval Measurement interval
+      @param interval Measurement interval (ms)
       @return True if successful
+      @warning Returns an error if periodic measurement is already running
     */
     inline bool startPeriodicMeasurement(const weighti2c::Mode mode, const uint32_t interval = 80)
     {
@@ -177,14 +193,14 @@ public:
       @brief Measurement single shot
       @param[out] data Measured data
       @param mode Measurement mode
+      @return True if successful
       @warning Returns an error while periodic measurement is running
-
     */
     bool measureSingleshot(weighti2c::Data& data, const weighti2c::Mode mode);
     /*!
       @brief Measurement single shot return as string
-      @param[out] buf string buffer
-      @return True if successful
+      @param[out] buf String buffer (weight text read from the unit, up to 15 characters + '\0')
+      @return True if successful, false if buf is nullptr or on error
       @warning Buffer length must be at least 16 bytes
       @warning Returns an error while periodic measurement is running
      */
@@ -202,7 +218,7 @@ public:
     /*!
       @brief Write the gap value
       @param gap Calibration gap value in device-defined weight units
-      @param duration Max command duration(ms)
+      @param duration Wait time after writing (ms)
       @return True if successful
      */
     bool writeGap(const float gap, const uint32_t duration = 100);
@@ -217,7 +233,7 @@ public:
     ///@name Filter
     ///@{
     /*!
-      @brief Is enabled the Low-Pass Filter?
+      @brief Is the Low-Pass Filter enabled?
       @param[out] enabled True if enabled
       @return True if successful
      */
@@ -230,26 +246,26 @@ public:
     bool enableLPFilter(const bool enable);
     /*!
       @brief Read the Averaging Filter level
-      @param[out] level value
+      @param[out] level Averaging Filter level (0-50)
       @return True if successful
      */
     bool readAvgFilterLevel(uint8_t& level);
     /*!
       @brief Write the Averaging Filter level
-      @param level value
+      @param level Averaging Filter level (0-50)
       @return True if successful
       @warning Valid values range from 0 to 50
      */
     bool writeAvgFilterLevel(const uint8_t level);
     /*!
       @brief Read the Exponential Moving Average Filter alpha
-      @param[out] alpha value
+      @param[out] alpha Exponential Moving Average Filter alpha (0-99)
       @return True if successful
      */
     bool readEmaFilterAlpha(uint8_t& alpha);
     /*!
       @brief Write the Exponential Moving Average Filter alpha
-      @param alpha value
+      @param alpha Exponential Moving Average Filter alpha (0-99)
       @return True if successful
       @warning Valid values range from 0 to 99
     */
@@ -276,6 +292,8 @@ public:
       @brief Change unit I2C address
       @param i2c_address I2C address
       @return True if successful
+      @note If the unit does not respond at the new address within 1 s, this returns false,
+      but this object already uses the new address
     */
     bool changeI2CAddress(const uint8_t i2c_address);
     ///@}

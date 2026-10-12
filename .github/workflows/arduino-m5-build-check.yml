@@ -2,7 +2,7 @@ name: Build(arduino-m5stack)
 
 env:
   SKETCH_NAMES_FIND_START: ./examples/UnitUnified
-  REQUIRED_LIBRARIES: M5Unified,M5UnitUnified
+  REQUIRED_LIBRARIES: M5Unified,M5UnitUnified,M5Unit-HUB
 
 on:
   push:
@@ -79,7 +79,7 @@ jobs:
           - m5stack_dinmeter
           - m5stack_fire
           - m5stack_nano_c6
-#          - m5stack_nano_h2
+          - m5stack_nano_h2
           - m5stack_paper
           - m5stack_papers3
 #          - m5stack_poe_cam
@@ -98,13 +98,23 @@ jobs:
 #          - m5stack_unit_cams3
 
         platform-version:
-          - 3.2.5
+          - 3.3.9
 
         platform:
           - m5stack
 
         archi:
           - esp32
+
+        include:
+          # ViaPaHub connects both units through one PaHub (M5Unit-HUB is an example-only dependency)
+          - sketch: ViaPaHub
+            unit: ""
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform-version: 3.3.9
+            platform: m5stack
+            archi: esp32
+            board: m5stack_core
 
     steps:
       - name: Checkout

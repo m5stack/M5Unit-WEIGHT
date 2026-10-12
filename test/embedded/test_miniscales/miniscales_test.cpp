@@ -72,7 +72,7 @@ TEST_F(TestMiniScales, LED)
 
         // uint16_t
         lgfx::rgb565_t rgb565(r, g, b);
-        EXPECT_TRUE(unit->writeLEDColor((uint16_t)rgb565));
+        EXPECT_TRUE(unit->writeLEDColor565(static_cast<uint16_t>(rgb565)));
         EXPECT_TRUE(unit->readLEDColor(r2, g2, b2));
 
         EXPECT_EQ(rgb565.R8(), r2);
@@ -94,6 +94,28 @@ TEST_F(TestMiniScales, Button)
     EXPECT_FALSE(press);
 
     unit->update();
+    EXPECT_FALSE(unit->isPressed());
     EXPECT_FALSE(unit->wasPressed());
     EXPECT_FALSE(unit->wasReleased());
+}
+
+TEST_F(TestMiniScales, BeginAppliesManageButtonStatus)
+{
+    SCOPED_TRACE(ustr);
+
+    auto cfg                 = unit->config();
+    cfg.manage_button_status = false;
+    unit->config(cfg);
+    EXPECT_TRUE(unit->begin());
+    EXPECT_FALSE(unit->config().manage_button_status);
+
+    // Button state is not updated, so no edge appears
+    unit->update(true);
+    EXPECT_FALSE(unit->wasPressed());
+    EXPECT_FALSE(unit->wasReleased());
+
+    // Restore
+    cfg.manage_button_status = true;
+    unit->config(cfg);
+    EXPECT_TRUE(unit->begin());
 }

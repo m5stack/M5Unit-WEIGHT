@@ -1,0 +1,15 @@
+## Dependencies for the ESP-IDF build of the ViaPaHub example.
+## - M5Unit-WEIGHT is taken from the local checkout (path) so the example builds against the
+##   library in this repo. M5UnitUnified (and its transitive deps M5HAL / M5Utility) are pulled in via
+##   M5Unit-WEIGHT's own idf_component.yml (git main until the ESP Component Registry publish).
+## - M5Unit-HUB (UnitPaHub) is an example-only dependency; not on the ESP Component Registry yet, so
+##   the main branch is referenced via git.
+## - M5Unified >=0.2.17 declares M5GFX as a transitive dependency in its idf_component.yml.
+dependencies:
+  idf: ">=5.1"
+  m5stack/M5Unit-WEIGHT:
+    path: "../../../.."
+  m5stack/M5Unit-HUB:
+    git: https://github.com/m5stack/M5Unit-HUB.git
+    version: main
+  m5stack/M5Unified: ">=0.2.17"

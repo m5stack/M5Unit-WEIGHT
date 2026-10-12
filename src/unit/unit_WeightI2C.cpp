@@ -34,20 +34,23 @@ bool UnitWeightI2C::begin()
         }
     }
 
+    // Restart from idle so that begin() can be called again while measuring
+    stop_periodic_measurement();
+
     // WeightI2C/MiniScales use HX711. Wait for power-up/reset settling (RATE=0: up to about 400ms)
     // so the first weight readings are stable.
     m5::utility::delay(400);
 
     uint8_t ver{};
     bool ready{};
-    auto timeout_at = m5::utility::millis() + 1500;
+    const auto start_at = m5::utility::millis();
     do {
         ready = read_register8(FIRMWARE_VERSION_REG, ver) && ver != 0;
         if (ready) {
             break;
         }
         m5::utility::delay(100);
-    } while (m5::utility::millis() <= timeout_at);
+    } while (!m5::utility::hasElapsed(start_at, 1500));
     if (!ready) {
         M5_LIB_LOGE("Failed to read firmware version %x", ver);
         return false;
@@ -68,8 +71,8 @@ void UnitWeightI2C::update(const bool force)
 {
     _updated = false;
     if (inPeriodic()) {
-        elapsed_time_t at{m5::utility::millis()};
-        if (force || !_latest || at >= _latest + _interval) {
+        const elapsed_time_t at{m5::utility::millis()};
+        if (force || !_latest || m5::utility::hasElapsed(_latest, _interval, at)) {
             Data d{};
             _updated = read_measurement(d, _mode);
             if (_updated) {
@@ -152,10 +155,9 @@ bool UnitWeightI2C::resetOffset()
 
 bool UnitWeightI2C::readRawADC(int32_t& value)
 {
-    uint8_t buf[4];
-    if (read_register(RAW_ADC_REG, buf, 4U)) {
-        value = static_cast<int32_t>(static_cast<uint32_t>(buf[0]) | (static_cast<uint32_t>(buf[1]) << 8) |
-                                     (static_cast<uint32_t>(buf[2]) << 16) | (static_cast<uint32_t>(buf[3]) << 24));
+    m5::types::little_int32_t v{};
+    if (read_register(RAW_ADC_REG, v.data(), 4U)) {
+        value = v.get();
         return true;
     }
     return false;
@@ -218,14 +220,14 @@ bool UnitWeightI2C::changeI2CAddress(const uint8_t i2c_address)
         return false;
     }
     if (writeRegister8(I2C_ADDRESS_REG, i2c_address) && changeAddress(i2c_address)) {
-        // Wait wakeup
+        // Wait until the unit responds at the new address
         uint8_t v{};
         bool done{};
-        auto timeout_at = m5::utility::millis() + 1000;
+        const auto start_at = m5::utility::millis();
         do {
             m5::utility::delay(1);
             done = (read_register8(I2C_ADDRESS_REG, v) && v == i2c_address);
-        } while (!done && m5::utility::millis() <= timeout_at);
+        } while (!done && !m5::utility::hasElapsed(start_at, 1000));
         return done;
     }
     return false;

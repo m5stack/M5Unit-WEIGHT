@@ -1,7 +1,7 @@
 {
     "name": "M5Unit-WEIGHT",
     "description": "Library for M5Stack UNIT WEIGHT using M5UnitUnified",
-    "keywords": "m5stack, m5unitunified, weight, weighti2c, miniscales, load-cell, i2c",
+    "keywords": "m5stack,m5unitunified,weight,weighti2c,miniscales,load-cell,i2c",
     "authors": {
         "name": "M5Stack",
         "url": "https://www.m5stack.com"
@@ -11,11 +11,13 @@
         "url": "https://github.com/m5stack/M5Unit-WEIGHT.git"
     },
     "dependencies": {
-        "m5stack/M5UnitUnified": ">=0.4.4"
+        "m5stack/M5UnitUnified": ">=0.6.0",
+        "m5stack/M5Utility": ">=0.3.0"
     },
-    "version": "0.1.1",
+    "version": "0.2.0",
     "frameworks": [
-        "arduino"
+        "arduino",
+        "espidf"
     ],
     "platforms": [
         "espressif32"

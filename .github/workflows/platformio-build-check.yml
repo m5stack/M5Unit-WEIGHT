@@ -71,6 +71,7 @@ jobs:
           - AtomS3
           - AtomS3R
           - NanoC6
+          - NanoH2
           - StickCPlus
           - StickCPlus2
           - StickS3
@@ -85,6 +86,39 @@ jobs:
 
         espressif32:
           - latest
+
+        include:
+          # ViaPaHub connects both units through one PaHub (M5Unit-HUB is an example-only dependency)
+          - example: ViaPaHub
+            unit: ''
+            board: Core
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPaHub
+            unit: ''
+            board: CoreS3
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPaHub
+            unit: ''
+            board: NanoC6
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPaHub
+            unit: ''
+            board: NanoH2
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPaHub
+            unit: ''
+            board: Tab5
+            framework: Arduino
+            espressif32: latest
+          - example: ViaPaHub
+            unit: ''
+            board: NessoN1
+            framework: Arduino
+            espressif32: latest
 
     steps:
       - name: Checkout
